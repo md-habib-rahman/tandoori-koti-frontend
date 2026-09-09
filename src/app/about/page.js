@@ -64,7 +64,7 @@ export default function AboutPage() {
   return (
     <div className="w-full bg-brand-dark text-brand-cream overflow-hidden">
       {/* ----------------- SECTION 1: ABOUT HERO ----------------- */}
-      <section className="relative pt-12 pb-24 md:pt-64 md:pb-32">
+      <section className="relative pt-48 pb-24 md:pt-64 md:pb-32">
         {/* Ambient Glows */}
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.12, 0.22, 0.12] }}

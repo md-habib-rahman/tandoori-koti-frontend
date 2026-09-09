@@ -203,7 +203,7 @@ export default function MenuPage() {
       {/* --------------------------------------------------------
           1. HERO BANNER
       -------------------------------------------------------- */}
-      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden pt-48">
         <Image
           src="https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09450.jpg"
           alt="Outdoor dining table"

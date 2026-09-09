@@ -31,7 +31,7 @@ export default function Hero() {
   const t = content[lang] || content.fi;
 
   return (
-    <section className="relative w-full overflow-hidden bg-brand-dark pt-32 pb-20 md:pt-64 md:pb-28">
+    <section className="relative w-full overflow-hidden bg-brand-dark pt-48 pb-20 md:pt-64 md:pb-28">
       {/* Background Radial Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-87.5 bg-brand-gold/10 rounded-full blur-[140px] pointer-events-none" />
 
