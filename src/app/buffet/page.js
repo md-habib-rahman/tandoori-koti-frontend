@@ -18,94 +18,104 @@ import { useLanguage } from "@/context/LanguageContext";
 import ReservationCta from "@/components/common/ReservationCta";
 import InstagramGrid from "@/components/common/InstagramGrid";
 
-const WEEKDAYS = [
-  { key: "mon", fi: "Maanantai", en: "Monday", dayIndex: 1 },
-  { key: "tue", fi: "Tiistai", en: "Tuesday", dayIndex: 2 },
-  { key: "wed", fi: "Keskiviikko", en: "Wednesday", dayIndex: 3 },
-  { key: "thu", fi: "Torstai", en: "Thursday", dayIndex: 4 },
-  { key: "fri", fi: "Perjantai", en: "Friday", dayIndex: 5 },
-];
-
-/**
- * Calculates Monday–Friday dates.
- * If today is Saturday (6) or Sunday (0), it shifts to next week's Monday–Friday.
- */
-function getTargetWeekDays() {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-  // Days needed to reach target Monday
-  let daysToMonday = 0;
-  if (isWeekend) {
-    daysToMonday = dayOfWeek === 6 ? 2 : 1; // Sat -> +2 days, Sun -> +1 day
-  } else {
-    daysToMonday = 1 - dayOfWeek; // Mon(1)->0, Tue(2)->-1 ... Fri(5)->-4
-  }
-
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + daysToMonday);
-  monday.setHours(0, 0, 0, 0);
-
-  return WEEKDAYS.map((w, idx) => {
-    const dayDate = new Date(monday);
-    dayDate.setDate(monday.getDate() + idx);
-
-    const isToday =
-      !isWeekend &&
-      dayDate.getDate() === now.getDate() &&
-      dayDate.getMonth() === now.getMonth() &&
-      dayDate.getFullYear() === now.getFullYear();
-
-    const formattedDate = dayDate.toLocaleDateString("fi-FI", {
-      day: "2-digit",
-      month: "2-digit",
-    });
-
-    const isoDate = dayDate.toISOString().split("T")[0];
-
-    return {
-      ...w,
-      date: dayDate,
-      formattedDate,
-      isoDate,
-      isToday,
-    };
-  });
-}
+const DAY_NAMES = {
+  0: { fi: "Sunnuntai", en: "Sunday", key: "sun" },
+  1: { fi: "Maanantai", en: "Monday", key: "mon" },
+  2: { fi: "Tiistai", en: "Tuesday", key: "tue" },
+  3: { fi: "Keskiviikko", en: "Wednesday", key: "wed" },
+  4: { fi: "Torstai", en: "Thursday", key: "thu" },
+  5: { fi: "Perjantai", en: "Friday", key: "fri" },
+  6: { fi: "Lauantai", en: "Saturday", key: "sat" },
+};
 
 export default function BuffetPage() {
   const { lang } = useLanguage();
   const carouselRef = useRef(null);
 
-  const [weekDays, setWeekDays] = useState([]);
-  const [buffetMenu, setBuffetMenu] = useState({});
+  const [cardsToDisplay, setCardsToDisplay] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMenuData, setHasMenuData] = useState(false);
 
   useEffect(() => {
-    const days = getTargetWeekDays();
-    setWeekDays(days);
-
     const fetchBuffet = async () => {
       try {
         setLoading(true);
         const baseUrl =
           process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
-        const startDate = days[0].isoDate;
-        const endDate = days[4].isoDate;
 
-        const res = await axios.get(`${baseUrl}/menu/buffet`, {
-          params: { startDate, endDate },
-        });
+        // Query the buffet endpoint (omitting rigid date params to get full available week data)
+        const res = await axios.get(`${baseUrl}/menu/buffet`);
+        const rawData = res.data?.data || res.data || {};
 
-        const data = res.data?.data || res.data || {};
-        const isDataAvailable = Object.keys(data).length > 0;
+        const entries = Array.isArray(rawData)
+          ? rawData
+          : Object.entries(rawData).map(([key, val]) => ({
+              dateKey: key,
+              ...(typeof val === "object" ? val : { dishes: val }),
+            }));
 
-        setBuffetMenu(data);
-        setHasMenuData(isDataAvailable);
+        if (entries.length > 0) {
+          const now = new Date();
+          const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+          // Sort entries chronologically
+          const sorted = [...entries].sort((a, b) => {
+            const dateA = new Date(a.date || a.dateKey || a.createdAt || 0);
+            const dateB = new Date(b.date || b.dateKey || b.createdAt || 0);
+            return dateA - dateB;
+          });
+
+          // Normalize each record into a renderable card
+          const formattedCards = sorted.map((item, index) => {
+            const rawDateStr = item.date || item.dateKey;
+            const parsedDate = rawDateStr ? new Date(rawDateStr) : null;
+            const isValidDate = parsedDate && !isNaN(parsedDate.getTime());
+
+            const dayIndex = isValidDate
+              ? parsedDate.getDay()
+              : item.dayIndex !== undefined
+                ? item.dayIndex
+                : index + 1;
+
+            const dayInfo = DAY_NAMES[dayIndex] || {
+              fi: `Päivä ${index + 1}`,
+              en: `Day ${index + 1}`,
+              key: `day-${index}`,
+            };
+
+            const isoDate = isValidDate
+              ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, "0")}-${String(parsedDate.getDate()).padStart(2, "0")}`
+              : rawDateStr || `day-${index}`;
+
+            const formattedDate = isValidDate
+              ? parsedDate.toLocaleDateString("fi-FI", {
+                  day: "2-digit",
+                  month: "2-digit",
+                })
+              : "";
+
+            return {
+              id: item.id || item._id || isoDate,
+              key: dayInfo.key || `day-${index}`,
+              fi: dayInfo.fi,
+              en: dayInfo.en,
+              formattedDate,
+              isoDate,
+              isToday: isoDate === todayStr,
+              dishes: item.dishes || (Array.isArray(item) ? item : []),
+            };
+          });
+
+          setCardsToDisplay(formattedCards);
+          setHasMenuData(true);
+        } else {
+          setHasMenuData(false);
+          setCardsToDisplay([]);
+        }
       } catch (err) {
+        console.error("Error loading buffet menu:", err);
         setHasMenuData(false);
+        setCardsToDisplay([]);
       } finally {
         setLoading(false);
       }
@@ -114,7 +124,7 @@ export default function BuffetPage() {
     fetchBuffet();
   }, []);
 
-  // Center or scroll to today's card on initial load
+  // Center/scroll to today's card once loaded
   useEffect(() => {
     if (carouselRef.current && hasMenuData) {
       const todayEl = carouselRef.current.querySelector("[data-today='true']");
@@ -126,7 +136,7 @@ export default function BuffetPage() {
         });
       }
     }
-  }, [hasMenuData]);
+  }, [hasMenuData, cardsToDisplay]);
 
   const scroll = (direction) => {
     if (carouselRef.current) {
@@ -144,7 +154,7 @@ export default function BuffetPage() {
       todayTag: "TÄNÄÄN",
       nextWeekTag: "ENSI VIIKON MENU",
       noMenu:
-        "No Buffet menu available at this moment. check back in few moments",
+        "Lounasbuffet-listaa ei ole saatavilla juuri nyt. Tarkista hetken kuluttua uudelleen.",
       allInclusiveTag: "KAIKKI SISÄLTYY HINTAAN",
       allInclusiveTitle: "Mitä Buffet Sisältää?",
       pricingTitle: "Lounaan Hinnasto",
@@ -181,7 +191,7 @@ export default function BuffetPage() {
       todayTag: "TODAY",
       nextWeekTag: "NEXT WEEK'S MENU",
       noMenu:
-        "No Buffet menu available at this moment. check back in few moments",
+        "No Buffet menu available at this moment. Check back in a few moments.",
       allInclusiveTag: "ALL-INCLUSIVE EXPERIENCE",
       allInclusiveTitle: "What's Included in the Buffet?",
       pricingTitle: "Lunch Pricing",
@@ -227,12 +237,7 @@ export default function BuffetPage() {
           unoptimized
           className="object-cover object-center brightness-75 scale-105"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-brand-darker/60 via-brand-darker/40 to-brand-dark" />
-        {/* <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.22, 0.1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[360px] bg-brand-gold/15 rounded-full blur-[140px] pointer-events-none"
-        /> */}
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-darker/60 via-brand-darker/40 to-brand-dark" />
 
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-4 pt-32">
           <motion.div
@@ -266,7 +271,6 @@ export default function BuffetPage() {
 
       {/* ----------------- HORIZONTAL CAROUSEL SECTION ----------------- */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative">
-        {/* Top Controls: Weekend notice & Carousel Arrows */}
         <div className="flex items-center justify-between gap-4 mb-6 max-w-6xl mx-auto">
           <div>
             {isWeekendNow && (
@@ -277,7 +281,7 @@ export default function BuffetPage() {
             )}
           </div>
 
-          {hasMenuData && (
+          {hasMenuData && cardsToDisplay.length > 1 && (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => scroll("left")}
@@ -297,14 +301,12 @@ export default function BuffetPage() {
           )}
         </div>
 
-        {/* Loading State */}
         {loading && (
           <div className="py-20 text-center text-xs text-brand-muted font-sans tracking-wide">
             Loading buffet schedule...
           </div>
         )}
 
-        {/* Empty State / No Menu Found */}
         {!loading && !hasMenuData && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -320,25 +322,18 @@ export default function BuffetPage() {
           </motion.div>
         )}
 
-        {/* Horizontal Carousel (Mon–Fri) */}
         {!loading && hasMenuData && (
           <div
             ref={carouselRef}
-            className="flex items-stretch gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-none"
+            className="flex items-stretch gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-none pt-8"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {weekDays.map((day) => {
-              const dayMenu =
-                buffetMenu[day.isoDate] ||
-                buffetMenu[day.key] ||
-                buffetMenu[day.dayIndex];
-
-              const dishes = dayMenu?.dishes || [];
+            {cardsToDisplay.map((day) => {
               const dayTitle = lang === "fi" ? day.fi : day.en;
 
               return (
                 <div
-                  key={day.key}
+                  key={day.id}
                   data-today={day.isToday}
                   className={`shrink-0 w-[300px] sm:w-[340px] md:w-[360px] snap-center flex flex-col rounded-3xl p-6 transition-all duration-300 relative ${
                     day.isToday
@@ -346,14 +341,12 @@ export default function BuffetPage() {
                       : "bg-brand-card/60 border border-brand-gold/20 hover:border-brand-gold/40"
                   }`}
                 >
-                  {/* "Today" Highlight Badge */}
                   {day.isToday && (
                     <div className="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-brand-gold text-brand-darker font-sans text-[10px] font-bold uppercase tracking-widest shadow-md">
                       {t.todayTag}
                     </div>
                   )}
 
-                  {/* Card Header: Weekday & Date */}
                   <div className="border-b border-brand-gold/15 pb-4 mb-5">
                     <div className="flex items-baseline justify-between">
                       <h2
@@ -363,20 +356,21 @@ export default function BuffetPage() {
                       >
                         {dayTitle}
                       </h2>
-                      <span className="font-sans text-xs text-brand-gold/80 font-semibold tracking-wider">
-                        {day.formattedDate}
-                      </span>
+                      {day.formattedDate && (
+                        <span className="font-sans text-xs text-brand-gold/80 font-semibold tracking-wider">
+                          {day.formattedDate}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Dishes for this date */}
                   <div className="flex-1 space-y-4">
-                    {dishes.length === 0 ? (
+                    {day.dishes.length === 0 ? (
                       <p className="text-xs text-brand-muted italic py-6 text-center">
                         Menu for this day is being prepared.
                       </p>
                     ) : (
-                      dishes.map((dish, dIdx) => (
+                      day.dishes.map((dish, dIdx) => (
                         <div key={dIdx} className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span
@@ -392,14 +386,11 @@ export default function BuffetPage() {
                                   ? dish.nameFi || dish.name
                                   : dish.nameEn || dish.name}
                               </h3>
-                              {/* <span className="font-sans text-xs text-brand-cream/50">
-                                {lang === "fi"
-                                  ? dish.preparationFi || dish.preparation
-                                  : dish.preparationEn || dish.preparation}
-                              </span> */}
                             </div>
                           </div>
-                          {(dish.preparationFi || dish.preparationEn) && (
+                          {(dish.preparationFi ||
+                            dish.preparationEn ||
+                            dish.preparation) && (
                             <p className="text-[11px] sm:text-xs text-brand-muted font-sans pl-3.5 leading-relaxed">
                               {lang === "fi"
                                 ? dish.preparationFi || dish.preparation
@@ -420,7 +411,6 @@ export default function BuffetPage() {
       {/* ----------------- INCLUSIONS & PRICING MATRIX ----------------- */}
       <section className="py-20 bg-brand-darker border-y border-brand-gold/15">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: What is Included Checklist */}
           <div className="lg:col-span-6 space-y-6">
             <span className="text-xs uppercase tracking-[0.25em] text-brand-gold font-sans font-semibold">
               {t.allInclusiveTag}
@@ -452,7 +442,6 @@ export default function BuffetPage() {
             </div>
           </div>
 
-          {/* Right Column: Pricing Cards */}
           <div className="lg:col-span-6 space-y-4">
             <h3 className="text-xl font-serif font-bold text-brand-gold mb-2">
               {t.pricingTitle}
