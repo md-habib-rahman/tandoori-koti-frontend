@@ -6,8 +6,8 @@ import {
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import RecaptchaProvider from "@/components/providers/RecaptchaProvider";
+import Footer from "@/components/common/Footer";
 
 const marcellus = Marcellus({
   weight: "400",

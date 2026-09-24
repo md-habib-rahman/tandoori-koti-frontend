@@ -5,10 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, ArrowRight, Phone } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  Phone,
+  Mail,
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import InstagramGrid from "@/components/common/InstagramGrid";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import ReservationSection from "@/components/reservation/ReservationSection";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 24 },
@@ -35,14 +42,14 @@ export default function ContactPage() {
       badge: "OTA YHTEYTTÄ",
       title: "Yhteystiedot",
       addressTitle: "Käyntiosoite",
-      address: "Hämeenkatu 14\n33100 Tampere, Finland",
-      phone: "+358 40 123 4567",
-      email: "varaukset@tandoorikoti.fi",
+      address: "Välikatu 18\n87100 Kajaani, Finland",
+      phone: "+358 44 902 2407",
+      email: "tandoorikoti@gmail.com",
       followTitle: "Seuraa Meitä",
       hoursTitle: "Aukioloajat",
-      lunchTitle: "Lounasbuffet",
+      //   lunchTitle: "Lounasbuffet",
       lunchHours: "Ma–Pe 10:30 – 14:30",
-      dinnerTitle: "Á La Carte",
+      //   dinnerTitle: "Á La Carte",
       dinnerHours: "Ma–Pe 14:30 – 21:00\nLa–Su 12:00 – 21:00",
       formTag: "VARAA PÖYTÄ TAI KYSY",
       formHeading: "Ota yhteyttä",
@@ -69,7 +76,7 @@ export default function ContactPage() {
       addressTitle: "Location",
       address: "Välikatu 18\n87100 Kajaani, Finland",
       phone: "+358 44 902 2407",
-      //   email: "bookings@tandoorikoti.fi",
+      email: "tandoorikoti@gmail.com",
       followTitle: "Follow Us",
       hoursTitle: "Opening Hours",
       //   lunchTitle: "Lunch Time",
@@ -161,7 +168,7 @@ export default function ContactPage() {
       {/* --------------------------------------------------------
           1. HERO HEADER WITH AMBIENT BANQUET PHOTO (Matching Contact.jpg)
       -------------------------------------------------------- */}
-      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full h-100 md:h-125 flex items-center justify-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1800&q=80"
           alt="Outdoor dining table"
@@ -226,9 +233,7 @@ export default function ContactPage() {
             </h2>
             <div className="text-xs sm:text-sm text-brand-muted font-sans space-y-1.5">
               <p className="flex items-center gap-1">
-                <span className="text-brand-cream">
-                  <Phone size={16} />{" "}
-                </span>
+                <Phone size={16} />{" "}
                 <a
                   href={`tel:${t.phone.replace(/\s+/g, "")}`}
                   className="hover:text-brand-gold transition-colors"
@@ -236,15 +241,15 @@ export default function ContactPage() {
                   {t.phone}
                 </a>
               </p>
-              {/* <p>
-                <span className="text-brand-cream font-medium">E: </span>
+              <p className="flex items-center gap-1">
+                <Mail size={16} />{" "}
                 <a
                   href={`mailto:${t.email}`}
                   className="hover:text-brand-gold transition-colors"
                 >
                   {t.email}
                 </a>
-              </p> */}
+              </p>
             </div>
           </motion.div>
 
@@ -269,21 +274,21 @@ export default function ContactPage() {
                 Instagram
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/tandoorikoti"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-brand-gold transition-colors"
               >
                 Facebook
               </a>
-              <a
+              {/* <a
                 href="https://tripadvisor.com"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-brand-gold transition-colors"
               >
                 TripAdvisor
-              </a>
+              </a> */}
             </div>
           </motion.div>
 
@@ -334,10 +339,7 @@ export default function ContactPage() {
       {/* --------------------------------------------------------
           4. GET IN TOUCH FORM SECTION (Matching Contact.jpg)
       -------------------------------------------------------- */}
-      <section
-        id="reserve"
-        className="max-w-6xl mx-auto px-6 lg:px-8 py-24 md:py-32"
-      >
+      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-24 md:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
           {/* Left Column: Heading & Narrative */}
           <motion.div
@@ -502,6 +504,8 @@ export default function ContactPage() {
           </motion.div>
         </div>
       </section>
+
+      <ReservationSection />
 
       {/* --------------------------------------------------------
           5. "DISCOVER ABOUT US" CALLOUT BANNER (Matching Contact.jpg)

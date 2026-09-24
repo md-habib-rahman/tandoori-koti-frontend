@@ -165,7 +165,7 @@ export default function BuffetPage() {
           desc: "Sisältää kaikki lämpimät ruoat, salaattipöydän, tuoreen naan-leivän, kahvin ja jälkiruoan.",
         },
         {
-          name: "Lapset (4–10 v)",
+          name: "Lapset (5–112 v)",
           price: "8.90 €",
           desc: "Monipuolinen ja miedosti maustettu valikoima perheen pienimmille.",
         },
@@ -202,7 +202,7 @@ export default function BuffetPage() {
           desc: "Full access to all hot dishes, salad bar, fresh naan, tea, coffee & dessert.",
         },
         {
-          name: "Children (4–10 yrs)",
+          name: "Children (5–12 yrs)",
           price: "8.90 €",
           desc: "A varied, mild selection suitable for younger guests.",
         },

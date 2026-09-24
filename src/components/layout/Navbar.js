@@ -94,7 +94,7 @@ export default function Navbar() {
                   : "text-brand-muted hover:text-brand-cream"
               }`}
             >
-              FI
+              FIN
             </button>
             <span className="text-brand-gold/30">|</span>
             <button
@@ -171,7 +171,7 @@ export default function Navbar() {
                     : "text-brand-muted"
                 }`}
               >
-                FI
+                FIN
               </button>
               <button
                 onClick={() => switchLanguage("en")}

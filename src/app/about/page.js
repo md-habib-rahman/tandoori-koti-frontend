@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import ChefRecommend from "@/components/home/ChefRecommend";
 import ReservationCta from "@/components/common/ReservationCta";
 import InstagramGrid from "@/components/common/InstagramGrid";
+import SpecialFeatures from "@/components/home/SpecialFeatures";
 
 const textContainerVariants = {
   hidden: { opacity: 0 },
@@ -176,6 +177,9 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Special Feature */}
+      <SpecialFeatures />
 
       {/* ----------------- SECTION 2: CHEF RECOMMEND ----------------- */}
       <ChefRecommend />

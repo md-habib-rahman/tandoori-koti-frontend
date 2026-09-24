@@ -2,27 +2,27 @@ import Image from "next/image";
 
 const GALLERY_IMAGES = [
   {
-    src: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788718601/DSC09464.jpg",
     alt: "Dish 1",
   },
   {
-    src: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788718601/DSC09469.jpg",
     alt: "Dish 2",
   },
   {
-    src: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788797208/Ravintola_Tandoori_Koti.jpg",
     alt: "Restaurant Ambience",
   },
   {
-    src: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09463.jpg",
     alt: "Dining Room",
   },
   {
-    src: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09450.jpg",
     alt: "Dish 3",
   },
   {
-    src: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80",
+    src: "https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09457.jpg",
     alt: "Bar & Cocktails",
   },
 ];

@@ -1,86 +1,10 @@
-// "use client";
-
-// import Link from "next/link";
-// import { useLanguage } from "@/context/LanguageContext";
-
-// export default function Footer() {
-//   const { lang, t } = useLanguage();
-
-//   return (
-//     <footer className="w-full bg-brand-darker border-t border-brand-gold/15 pt-16 pb-12 text-brand-cream">
-//       <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
-//         {/* Logo / Brand Name */}
-//         <div className="space-y-1">
-//           <Link href="/" className="inline-block">
-//             <span className="font-serif text-3xl font-bold tracking-[0.18em] text-brand-gold">
-//               TANDOORI KOTI
-//             </span>
-//           </Link>
-//           <p className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-sans">
-//             Authentic Indian Restaurant & Buffet
-//           </p>
-//         </div>
-
-//         {/* Footer Navigation */}
-//         <nav className="flex flex-wrap justify-center gap-6 sm:gap-10 text-xs uppercase tracking-[0.2em] text-brand-muted">
-//           <Link href="/" className="hover:text-brand-gold transition-colors">
-//             {t.nav.home}
-//           </Link>
-//           <Link
-//             href="/about"
-//             className="hover:text-brand-gold transition-colors"
-//           >
-//             {t.nav.about}
-//           </Link>
-//           <Link
-//             href="/menu"
-//             className="hover:text-brand-gold transition-colors"
-//           >
-//             {t.nav.menu}
-//           </Link>
-//           <Link
-//             href="/buffet"
-//             className="hover:text-brand-gold transition-colors"
-//           >
-//             {t.nav.buffet}
-//           </Link>
-//           <Link
-//             href="/contact"
-//             className="hover:text-brand-gold transition-colors"
-//           >
-//             {t.nav.contact}
-//           </Link>
-//         </nav>
-
-//         {/* Hours & Contact */}
-//         <div className="text-xs text-brand-muted font-sans space-y-1 pt-2">
-//           <p>{t.common.openHours}</p>
-//           <p>
-//             {t.common.address} • {t.common.phone}
-//           </p>
-//         </div>
-
-//         {/* Bottom Copyright */}
-//         <div className="pt-6 border-t border-brand-gold/10 text-[11px] text-brand-muted/60 font-sans flex flex-col sm:flex-row items-center justify-between gap-4">
-//           <p>
-//             © {new Date().getFullYear()} Tandoori Koti. All rights reserved.
-//           </p>
-//           <p className="text-brand-muted/40">
-//             Crafted with passion & authentic spices.
-//           </p>
-//         </div>
-//       </div>
-//     </footer>
-//   );
-// }
-
 "use client";
 
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import Image from "next/image";
 
-export default function Footer() {
+export default function FooterOld() {
   const { lang } = useLanguage();
 
   const navLinks = [
