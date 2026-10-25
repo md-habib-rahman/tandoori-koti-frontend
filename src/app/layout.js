@@ -25,7 +25,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata = {
   title: "Tandoori Koti | Aito Intialainen Ravintola & Lounasbuffet",
   description:
-    "Authentic Indian cuisine and daily lunch buffet in Tampere, Finland.",
+    "Authentic Indian cuisine and daily lunch buffet in Kajaani, Finland.",
 };
 
 export default function RootLayout({ children }) {

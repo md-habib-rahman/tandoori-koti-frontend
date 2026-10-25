@@ -1,193 +1,272 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { Flame, Leaf, UtensilsCrossed } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
-const textContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const textItemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] },
-  },
-};
-
-export default function StorySnippet() {
+export default function StorySnippet({ showCta = true }) {
   const { lang } = useLanguage();
+  const reduce = useReducedMotion();
 
   const content = {
     fi: {
-      tag: "PERINTEITÄ & TUNNELMAA",
       quote:
         "Tandoori Koti on aitojen makujen tyyssija, jossa vuosisataiset intialaiset mausteperinteet ja hiiligrillin hehku heräävät eloon joka suupalalla.",
       story:
-        "Haluamme tuoda Tampereelle aitoa tandoorikeittiön taikaa. Valmistamme jokaisen annoksen parhaista raaka-aineista, perinteisellä saviuunilla ja lämmöllä, joka saa sinut tuntemaan olosi kotoisaksi.",
-      locationTag: "Tampere, Finland",
-      caption: "Tandoori Koti Dining Room",
+        "Haluamme tuoda tandoori-keittiön aidon taian Kajaaniin. Valmistamme jokaisen annoksen parhaista raaka-aineista perinteisessä saviuunissa ja tarjoilemme ne lämmöllä, joka saa sinut tuntemaan olosi aivan kuin olisit kotona.",
+      locationTag: "Kajaani, Suomi",
+      caption: "Ravintolasali",
+      imageAlt: "Tandoori Kotin ravintolasali",
+      cta: "Lue tarinamme",
+      points: [
+        "Saviuunissa valmistettu",
+        "Tuoreet mausteet",
+        "Päivittäin vaihtuva buffet",
+      ],
     },
     en: {
-      tag: "HERITAGE & AMBIENCE",
       quote:
-        "Tandoori Koti is a premium taste that yearns to be savored, bringing centuries of authentic Indian spicecraft and clay-oven warmth to every bite.",
+        "Tandoori Koti is a home for authentic flavour, where centuries of Indian spice tradition and the glow of the clay oven come alive in every bite.",
       story:
-        "We craft our dishes using time-honored Indian traditions, roasting fresh naan and tandoori meats over live heat, pairing bold aromatic spices with an intimate dining experience.",
-      locationTag: "Kajani, Finland",
-      caption: "Tandoori Koti Dining Room",
+        "We bring the magic of a real tandoor kitchen to Kajaani. Every dish is made from the best ingredients, in a traditional clay oven, with the warmth that makes you feel at home.",
+      locationTag: "Kajaani, Finland",
+      caption: "Our dining room",
+      imageAlt: "Tandoori Koti dining room",
+      cta: "Read our story",
+      points: [
+        "Cooked in a clay oven",
+        "Fresh spices",
+        "Daily changing buffet",
+      ],
     },
   };
 
   const t = content[lang] || content.fi;
+  const icons = [Flame, Leaf, UtensilsCrossed];
+
+  // Motion is switched off for visitors who prefer reduced motion
+  const container = {
+    hidden: { opacity: reduce ? 1 : 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: reduce ? 0 : 0.15,
+        delayChildren: reduce ? 0 : 0.15,
+      },
+    },
+  };
+  const item = {
+    hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 24 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
 
   return (
-    <section className="relative w-full py-20 md:py-32 bg-brand-dark border-t border-brand-gold/10 overflow-hidden">
-      {/* Animated Ambient Background Glow */}
-      <motion.div
-        animate={{
-          scale: [1, 1.25, 1],
-          opacity: [0.08, 0.16, 0.08],
+    <section
+      className="relative w-full overflow-hidden border-t border-[#F2A93B]/15 py-20 md:py-32"
+      style={{
+        backgroundImage:
+          "radial-gradient(55% 60% at 12% 55%, rgba(200,50,30,.28), transparent 70%), radial-gradient(45% 45% at 95% 15%, rgba(242,169,59,.14), transparent 70%), linear-gradient(200deg, #2A100D, #1C0D0A 70%)",
+      }}
+    >
+      {/* Subtle dot pattern, same as the hero */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20px 20px, #F2A93B 1.5px, transparent 2px)",
+          backgroundSize: "40px 40px",
         }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -right-20 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-gold/20 rounded-full blur-[140px] pointer-events-none"
       />
 
-      <div className="max-w-6xl mx-auto px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column: Animated Vertical Mood Interior */}
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-16">
+          {/* Arch-shaped image (an Indian doorway shape) */}
           <motion.div
-            initial={{ opacity: 0, x: -45, scale: 0.95 }}
+            initial={{
+              opacity: reduce ? 1 : 0,
+              x: reduce ? 0 : -45,
+              scale: reduce ? 1 : 0.95,
+            }}
             whileInView={{ opacity: 1, x: 0, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-5 flex justify-center lg:justify-start"
+            transition={{
+              duration: reduce ? 0 : 0.9,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="relative mx-auto w-full max-w-md lg:col-span-5 lg:mx-0"
           >
-            <div className="relative w-full max-w-md h-[460px] md:h-[540px] rounded-2xl overflow-hidden border border-brand-gold/30 shadow-2xl shadow-black/90 group">
+            {/* Warm glow behind the arch */}
+            <motion.div
+              aria-hidden="true"
+              animate={
+                reduce
+                  ? undefined
+                  : { scale: [1, 1.08, 1], opacity: [0.55, 0.9, 0.55] }
+              }
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -inset-10 rounded-full blur-2xl"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(242,169,59,.4), rgba(200,50,30,.2) 45%, transparent 70%)",
+              }}
+            />
+
+            {/* Dashed outline, echoing the ring around the hero plate */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-3 rounded-t-[999px] rounded-b-[2rem] border-2 border-dashed border-[#F2A93B]/35"
+            />
+
+            <div className="group relative h-[460px] overflow-hidden rounded-t-[999px] rounded-b-[2rem] border-[6px] border-white/30 shadow-2xl shadow-black/60 md:h-[560px]">
               <Image
                 src="https://res.cloudinary.com/vbi0knds/image/upload/v1788797208/Ravintola_Tandoori_Koti.jpg"
-                alt="Tandoori Koti Restaurant Ambience"
+                alt={t.imageAlt}
                 fill
                 unoptimized
-                className="object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-108"
+                sizes="(min-width: 1024px) 420px, 90vw"
+                className="object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-105 motion-reduce:transition-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-darker via-brand-darker/20 to-transparent" />
-
-              {/* Floating Glassmorphic Location Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-brand-darker/70 backdrop-blur-md border border-brand-gold/20"
-              >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-brand-gold font-sans font-semibold">
-                  {t.locationTag}
-                </span>
-                <p className="font-serif text-base sm:text-lg text-brand-cream mt-0.5">
-                  {t.caption}
-                </p>
-              </motion.div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1C0D0A]/70 via-transparent to-transparent" />
             </div>
+
+            {/* Location card, same style as the dish card in the hero */}
+            <motion.div
+              initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: reduce ? 0 : 0.6,
+                delay: reduce ? 0 : 0.5,
+              }}
+              className="absolute -bottom-4 left-4 max-w-[240px] rounded-2xl border border-[#F2A93B]/50 bg-[#1C0D0A]/85 px-4 py-3 backdrop-blur-md sm:-right-4 sm:left-auto"
+            >
+              <b className="block font-serif text-lg text-[#F2A93B]">
+                {t.caption}
+              </b>
+              <span className="font-sans text-sm text-[#D9C6A8]">
+                {t.locationTag}
+              </span>
+            </motion.div>
           </motion.div>
 
-          {/* Right Column: Staggered Narrative Typography & Animated Filigree */}
+          {/* Text */}
           <motion.div
-            variants={textContainerVariants}
+            variants={container}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            className="lg:col-span-7 space-y-7"
+            className="lg:col-span-7"
           >
-            <motion.p
-              variants={textItemVariants}
-              className="text-xs uppercase tracking-[0.3em] text-brand-gold font-sans font-semibold"
-            >
-              {t.tag}
-            </motion.p>
-
-            <motion.blockquote
-              variants={textItemVariants}
-              className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-cream leading-snug font-normal"
-            >
-              "{t.quote}"
-            </motion.blockquote>
-
-            <motion.p
-              variants={textItemVariants}
-              className="text-sm sm:text-base text-brand-muted font-sans leading-relaxed max-w-xl"
-            >
-              {t.story}
-            </motion.p>
-
-            {/* SVG Filigree with Animated Path Draw */}
-            <motion.div variants={textItemVariants} className="pt-2">
+            {/* Ornament: line, dot and small leaf shapes drawn in */}
+            <motion.div variants={item} className="mb-4">
               <svg
-                width="220"
-                height="32"
+                width="200"
+                height="28"
                 viewBox="0 0 200 28"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-brand-gold"
+                aria-hidden="true"
+                className="text-[#F2A93B]"
               >
                 <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
+                  initial={{
+                    pathLength: reduce ? 1 : 0,
+                    opacity: reduce ? 0.75 : 0,
+                  }}
                   whileInView={{ pathLength: 1, opacity: 0.75 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
-                  d="M0 14H60M140 14H200"
+                  transition={{
+                    duration: reduce ? 0 : 1.2,
+                    ease: "easeInOut",
+                    delay: 0.2,
+                  }}
+                  d="M0 14H70M130 14H200"
                   stroke="currentColor"
                   strokeWidth="1"
                   strokeDasharray="2 2"
                 />
+                <motion.path
+                  initial={{
+                    pathLength: reduce ? 1 : 0,
+                    opacity: reduce ? 0.9 : 0,
+                  }}
+                  whileInView={{ pathLength: 1, opacity: 0.9 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: reduce ? 0 : 1.4,
+                    ease: "easeInOut",
+                    delay: 0.4,
+                  }}
+                  d="M85 14C85 18 92 22 100 22C108 22 115 18 115 14C115 10 108 6 100 6C92 6 85 10 85 14Z"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                />
                 <motion.circle
-                  initial={{ scale: 0 }}
+                  initial={{ scale: reduce ? 1 : 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.5 }}
+                  transition={{ duration: reduce ? 0 : 0.4, delay: 0.5 }}
                   cx="100"
                   cy="14"
                   r="3"
                   fill="currentColor"
                 />
-                <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.9 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.4, ease: "easeInOut", delay: 0.4 }}
-                  d="M85 14C85 18 92 22 100 22C108 22 115 18 115 14C115 10 108 6 100 6C92 6 85 10 85 14Z"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                />
-                <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.7 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1, delay: 0.6 }}
-                  d="M72 14C72 16 76 18 80 18C84 18 88 16 88 14"
-                  stroke="currentColor"
-                  strokeWidth="0.75"
-                />
-                <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.7 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1, delay: 0.6 }}
-                  d="M112 14C112 16 116 18 120 18C124 18 128 16 128 14"
-                  stroke="currentColor"
-                  strokeWidth="0.75"
-                />
               </svg>
             </motion.div>
+
+            <motion.blockquote
+              variants={item}
+              className="font-serif text-3xl font-normal leading-snug text-brand-cream sm:text-4xl lg:text-[2.75rem] lg:leading-[1.2]"
+            >
+              <span aria-hidden="true" className="mr-1 text-[#F2A93B]">
+                “
+              </span>
+              {t.quote}
+              <span aria-hidden="true" className="ml-1 text-[#F2A93B]">
+                ”
+              </span>
+            </motion.blockquote>
+
+            <motion.p
+              variants={item}
+              className="mt-7 max-w-[34em] font-sans text-lg leading-relaxed text-[#D9C6A8]"
+            >
+              {t.story}
+            </motion.p>
+
+            {/* Highlights */}
+            <motion.ul variants={item} className="mt-8 flex flex-wrap gap-3">
+              {t.points.map((label, i) => {
+                const Icon = icons[i];
+                return (
+                  <li
+                    key={label}
+                    className="flex items-center gap-2 rounded-full border border-[#F2A93B]/35 bg-[#1C0D0A]/60 px-4 py-2 font-sans text-[15px] text-brand-cream backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-[#F2A93B]"
+                  >
+                    <Icon
+                      className="h-4 w-4 text-[#F2A93B]"
+                      aria-hidden="true"
+                    />
+                    {label}
+                  </li>
+                );
+              })}
+            </motion.ul>
+            {showCta && (
+              <motion.div variants={item} className="mt-9">
+                <Link
+                  href="/about"
+                  className="inline-flex items-center justify-center rounded-full border-2 border-brand-cream/45 px-7 py-3.5 font-sans text-base font-semibold text-brand-cream transition duration-300 hover:-translate-y-0.5 hover:border-[#F2A93B] hover:text-[#F2A93B] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F2A93B]"
+                >
+                  {t.cta}
+                </Link>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>

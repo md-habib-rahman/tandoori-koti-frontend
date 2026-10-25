@@ -8,16 +8,17 @@ export const translations = {
   fi: {
     nav: {
       home: "Etusivu",
-      menu: "Ruokalista",
+      menu: "Ruokalistamme",
       buffet: "Lounasbuffet",
       about: "Tarinamme",
       contact: "Yhteystiedot",
       reserve: "Varaa Pöytä",
+      delivery: "Toimitus",
     },
     common: {
       openHours: "Avoinna Ma–Pe 10:30–21:00 | La–Su 12:00–21:00",
       phone: "+358 40 123 4567",
-      address: "Hämeenkatu 14, Tampere",
+      address: "Hämeenkatu 14, Kajaani",
       bookOnline: "Tee Pöytävaraus",
       followUs: "Seuraa Meitä",
     },
@@ -25,11 +26,12 @@ export const translations = {
   en: {
     nav: {
       home: "Home",
-      menu: "Our Menus",
+      menu: "Our Menu",
       buffet: "Lunch Buffet",
       about: "About Us",
       contact: "Contact",
       reserve: "Book a Table",
+      delivery: "Delivery",
     },
     common: {
       openHours:

@@ -3,10 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
-  Sparkles,
   Check,
   Clock,
   Flame,
@@ -16,384 +15,433 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
+const FEATURES = [
+  {
+    id: "buffet",
+    icon: Clock,
+    title: { fi: "Lounasbuffet", en: "Lunch buffet" },
+    subtitle: {
+      fi: "Monipuolinen kattaus arkipäivisin",
+      en: "A generous weekday lunch spread",
+    },
+    badge: { fi: "Arkipäivän ateria", en: "Weekday meal" },
+    description: {
+      fi: "Kajaanin kattavin intialainen lounasbuffet: vähintään kolme lämmintä currya, tandoori-vartaita, uunituoretta naan-leipää, raikas salaattipöytä sekä kahvia ja teetä.",
+      en: "Kajaani's most generous Indian lunch table: rotating aromatic curries, clay-oven tandoori specialties, hot naan, a fresh salad bar, and coffee or spiced chai.",
+    },
+    highlights: {
+      fi: [
+        "Päivittäin vaihtuvat maut",
+        "Tuore naan suoraan uunista",
+        "Sisältää salaatin ja kahvin",
+      ],
+      en: [
+        "Daily rotating recipes",
+        "Oven-fresh tandoori naan",
+        "Salad and coffee included",
+      ],
+    },
+    image:
+      "https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09463.jpg",
+    cta: {
+      href: "/buffet",
+      fi: "Tutustu buffet-listaan",
+      en: "See the buffet menu",
+    },
+  },
+  {
+    id: "alacarte",
+    icon: Flame,
+    title: { fi: "À la carte -elämys", en: "À la carte dining" },
+    subtitle: {
+      fi: "Kulinaarista käsityötä iltaisin ja viikonloppuisin",
+      en: "Authentic North Indian cooking",
+    },
+    badge: { fi: "Avoinna joka päivä", en: "Open every day" },
+    description: {
+      fi: "Perinteisiä pohjoisintialaisia mestariteoksia valmistettuna perinteisessä tandooriuunissa, täyteläisiä biryaneja ja huolella maustettuja kasvisherkkuja.",
+      en: "Tandoor meats marinated for 24 hours, slow-simmered curries, fragrant dum biryanis, and vibrant vegan dishes.",
+    },
+    highlights: {
+      fi: [
+        "Aito hiiligrilli-tandoori",
+        "Laaja kasvis- ja vegaanivalikoima",
+        "Räätälöity tulisuusaste",
+      ],
+      en: [
+        "Charcoal clay-oven grills",
+        "Wide vegetarian menu",
+        "Spice level to your taste",
+      ],
+    },
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+    cta: {
+      href: "/menu",
+      fi: "Selaa ruokalistaa",
+      en: "Explore the full menu",
+    },
+  },
+  {
+    id: "dinein",
+    icon: Wine,
+    title: { fi: "Tunnelmallinen sali", en: "Atmospheric dine-in" },
+    subtitle: {
+      fi: "Lämmin ja rauhallinen ravintolamiljöö",
+      en: "Warm, candlelit ambience",
+    },
+    badge: { fi: "Pöytävaraukset verkossa", en: "Book a table online" },
+    description: {
+      fi: "Lämmin puusisustus, pehmeä valaistus ja huomaavainen pöytiintarjoilu luovat ihanteellisen ympäristön merkkipäiville, liiketapaamisille tai treffeille.",
+      en: "Golden lighting, dark wood and attentive table service make the perfect setting for dates, anniversaries and family dinners.",
+    },
+    highlights: {
+      fi: [
+        "Rauhallinen tunnelma",
+        "Ennakkopöytävaraus mahdollinen",
+        "Laatuviinit ja intialaiset oluet",
+      ],
+      en: [
+        "Calm, intimate setting",
+        "Easy online reservation",
+        "Curated wines and Indian beers",
+      ],
+    },
+    image:
+      "https://res.cloudinary.com/vbi0knds/image/upload/v1788797208/Ravintola_Tandoori_Koti.jpg",
+    cta: {
+      href: "/contact#reserve",
+      fi: "Varaa oma pöytäsi",
+      en: "Reserve a table",
+    },
+  },
+  {
+    id: "takeaway",
+    icon: ShoppingBag,
+    title: { fi: "Nouto ja takeaway", en: "Takeaway and delivery" },
+    subtitle: {
+      fi: "Ravintolatasoiset maut kotiovelle",
+      en: "Restaurant quality at home",
+    },
+    badge: { fi: "Nopea valmistus", en: "Quick and hot" },
+    description: {
+      fi: "Tilaa suosikkiateriasi noudettavaksi suoraan keittiöstämme tai tilaa kuljetus kotiin. Ruoka pakataan lämpöä pitäviin rasioihin, jotta se pysyy kuumana ja naan rapeana.",
+      en: "Order ahead for pickup on your way home, or get it delivered. Everything is packed to keep oven heat and naan crispness.",
+    },
+    highlights: {
+      fi: [
+        "10 % etu suoranoutoihin",
+        "Pysyy kuumana ja rapeana",
+        "Helppo ennakkotilaus",
+      ],
+      en: [
+        "Discount on direct orders",
+        "Insulated packaging",
+        "Convenient pickup times",
+      ],
+    },
+    image:
+      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1200&q=80",
+    cta: { href: "/menu", fi: "Tilaa noutoannos", en: "Order takeaway" },
+  },
+  {
+    id: "catering",
+    icon: PartyPopper,
+    title: { fi: "Catering ja juhlat", en: "Catering and events" },
+    subtitle: {
+      fi: "Unohtumattomat tarjoilut juhliisi",
+      en: "Feasts for any occasion",
+    },
+    badge: { fi: "Räätälöidyt kokonaisuudet", en: "Tailored to 20–200 guests" },
+    description: {
+      fi: "Haluatko hurmata vieraasi aidoilla intialaisilla mauilla? Suunnittelemme menut yritystilaisuuksiin, syntymäpäiville, häihin ja yksityistapahtumiin toiveidesi mukaan.",
+      en: "Bring the flavours of India to your celebration. From birthday parties to corporate banquets, we design the full catering menu with you.",
+    },
+    highlights: {
+      fi: [
+        "Yksilölliset erikoismenut",
+        "Täysi lämpö- ja tarjoilutuki",
+        "Myös suuriin tilaisuuksiin",
+      ],
+      en: [
+        "Custom chef-designed menus",
+        "Warming and serving setups",
+        "Corporate and private events",
+      ],
+    },
+    image:
+      "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=80",
+    cta: {
+      href: "/contact",
+      fi: "Pyydä juhlatarjous",
+      en: "Request a catering quote",
+    },
+  },
+];
+
 export default function SpecialFeatures() {
   const { lang } = useLanguage();
+  const reduce = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const features = [
-    {
-      index: "01",
-      id: "buffet",
-      icon: Clock,
-      title: {
-        fi: "Lounasbuffet",
-        en: "Lunch Buffet",
-      },
-      subtitle: {
-        fi: "Monipuolinen kattaus arkipäivisin",
-        en: "Vibrant Weekday Lunch Spread",
-      },
-      badge: {
-        en: "Weekdays Meal",
-        fi: "Arkipäivän Ateria",
-      },
-      description: {
-        fi: "Tampereen runsain intialainen lounaspöytä: vähintään kolme lämmintä currya, tandoorivartaat, uunituore naan-leipä, raikas salaattipöytä sekä kahvi ja tee.",
-        en: "Tampere’s premier midday dining experience featuring rotating aromatic curries, clay-oven tandoori specialties, hot naan, expansive salads, and spiced chai.",
-      },
-      highlights: {
-        fi: [
-          "Päivittäin vaihtuvat maut",
-          "Tuore naan suoraan uunista",
-          "Sisältää salaatin & kahvin",
-        ],
-        en: [
-          "Daily rotating recipes",
-          "Oven-fresh tandoori naan",
-          "Full salad & coffee included",
-        ],
-      },
-      image:
-        "https://res.cloudinary.com/vbi0knds/image/upload/v1788718600/DSC09463.jpg",
-      cta: {
-        href: "/buffet",
-        fi: "Tutustu Buffet-listaan",
-        en: "View Buffet Schedule",
-      },
-    },
-    {
-      index: "02",
-      id: "alacarte",
-      icon: Flame,
-      title: {
-        fi: "Á La Carte -Elämys",
-        en: "Á La Carte Dining",
-      },
-      subtitle: {
-        fi: "Kulinaarista käsityötä iltaisin ja viikonloppuisin",
-        en: "Authentic North Indian Culinary Art",
-      },
-      badge: {
-        fi: "Avoinna joka päivä",
-        en: "Available Every Day",
-      },
-      description: {
-        fi: "Perinteisiä pohjoisintialaisia mestariteoksia valmistettuna perinteisessä tandooriuunissa, täyteläisiä biryaneja ja huolella maustettuja kasvisherkkuja.",
-        en: "Handcrafted tandoor meats marinated for 24 hours, slow-simmered rich curries, fragrance-loaded dum biryanis, and vibrant vegan selections.",
-      },
-      highlights: {
-        fi: [
-          "Aito hiiligrilli-tandoori",
-          "Laaja kasvis- ja vegaanivalikoima",
-          "Räätälöity tulisuusaste",
-        ],
-        en: [
-          "Charcoal clay tandoori grills",
-          "Extensive vegetarian menu",
-          "Customizable spice profiles",
-        ],
-      },
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-      cta: {
-        href: "/menu",
-        fi: "Selaa Ruokalistaa",
-        en: "Explore Full Menu",
-      },
-    },
-    {
-      index: "03",
-      id: "dinein",
-      icon: Wine,
-      title: {
-        fi: "Tunnelmallinen Sali",
-        en: "Atmospheric Dine-In",
-      },
-      subtitle: {
-        fi: "Ylellinen ja rauhallinen ravintolamiljöö",
-        en: "Warm Luxury & Candlelit Ambience",
-      },
-      badge: {
-        fi: "Pöytävaraukset verkossa",
-        en: "Online Table Booking",
-      },
-      description: {
-        fi: "Lämmin puusisustus, pehmeä valaistus ja huomaavainen pöytiintarjoilu luovat ihanteellisen ympäristön merkkipäiville, liiketapaamisille tai treffeille.",
-        en: "Subtle golden lighting, dark wood finishes, and attentive table service provide the perfect backdrop for intimate dates, anniversaries, and family dinners.",
-      },
-      highlights: {
-        fi: [
-          "Rauhallinen tunnelma",
-          "Ennakkopöytävaraus mahdollinen",
-          "Laatuviinit & intialaiset oluet",
-        ],
-        en: [
-          "Intimate acoustic setting",
-          "Instant online reservation",
-          "Curated wines & Indian beers",
-        ],
-      },
-      image:
-        "https://res.cloudinary.com/vbi0knds/image/upload/v1788797208/Ravintola_Tandoori_Koti.jpg",
-      cta: {
-        href: "/contact#reserve",
-        fi: "Varaa Oma Pöytäsi",
-        en: "Reserve a Table",
-      },
-    },
-    {
-      index: "04",
-      id: "takeaway",
-      icon: ShoppingBag,
-      title: {
-        fi: "Nouto & Takeaway",
-        en: "Takeaway & Delivery",
-      },
-      subtitle: {
-        fi: "Ravintolatasoiset maut kotiovelle",
-        en: "Restaurant Quality in Your Home",
-      },
-      badge: {
-        fi: "Nopea valmistus",
-        en: "Quick & Hot Packaging",
-      },
-      description: {
-        fi: "Tilaa suosikkiateriasi noudettavaksi suoraan keittiöstämme tai tilaa kuljetus kotiin. Ruoka pakataan lämpöä pitäviin laaturasioihin rapeuden takaamiseksi.",
-        en: "Order ahead for swift pickup on your way home, or enjoy direct courier delivery. All orders are packed to retain oven heat and naan crispness.",
-      },
-      highlights: {
-        fi: [
-          "10% etu suoranoutoihin",
-          "Pysyy kuumana ja rapeana",
-          "Helppo ennakkotilaus",
-        ],
-        en: [
-          "Direct order discounts",
-          "Thermal protective packaging",
-          "Convenient pickup times",
-        ],
-      },
-      image:
-        "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1200&q=80",
-      cta: {
-        href: "/menu",
-        fi: "Tilaa Noutoannos",
-        en: "Order Takeaway",
-      },
-    },
-    {
-      index: "05",
-      id: "catering",
-      icon: PartyPopper,
-      title: {
-        fi: "Catering & Juhlat",
-        en: "Catering & Events",
-      },
-      subtitle: {
-        fi: "Unohtumattomat tarjoilut elämäsi juhliin",
-        en: "Bespoke Feasts for Any Occasion",
-      },
-      badge: {
-        fi: "Räätälöidyt kokonaisuudet",
-        en: "Tailored to 20–200 Guests",
-      },
-      description: {
-        fi: "Haluatko hurmata vieraasi aidoilla intialaisilla mauilla? Suunnittelemme menut yritystilaisuuksiin, syntymäpäiville, häihin ja yksityistapahtumiin toiveidesi mukaan.",
-        en: "Bring the royal flavours of India to your private celebration. From intimate birthday parties to corporate banquets, we curate complete catering menus.",
-      },
-      highlights: {
-        fi: [
-          "Yksilölliset erikoismenut",
-          "Täysi lämpö- ja tarjoilutuki",
-          "Myös suuriin tilaisuuksiin",
-        ],
-        en: [
-          "Custom chef-designed menus",
-          "Buffet warming setups provided",
-          "Corporate & private events",
-        ],
-      },
-      image:
-        "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=80",
-      cta: {
-        href: "/contact",
-        fi: "Pyydä Juhlatarjous",
-        en: "Request Catering Quote",
-      },
-    },
-  ];
+  const current = FEATURES[activeIndex];
+  const pick = (obj) => obj[lang] || obj.fi;
 
-  const current = features[activeIndex];
+  const fadeUp = {
+    initial: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 28 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: "-80px" },
+    transition: { duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] },
+  };
+
+  // Content of the stage staggers in each time the selection changes
+  const stage = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: reduce ? 0 : 0.09,
+        delayChildren: reduce ? 0 : 0.2,
+      },
+    },
+  };
+  const stageItem = {
+    hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 18 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
 
   return (
-    <section className="relative w-full py-28 md:py-36 bg-[#080d0f] text-brand-cream border-t border-brand-gold/15 overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-1/4 -right-40 w-[600px] h-[600px] bg-brand-gold/[0.04] rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute bottom-10 -left-40 w-[500px] h-[500px] bg-brand-gold/[0.03] rounded-full blur-[160px] pointer-events-none" />
+    <section
+      className="relative w-full overflow-hidden border-t border-[#F2A93B]/15 py-24 md:py-32"
+      style={{
+        backgroundImage:
+          "radial-gradient(50% 45% at 90% 20%, rgba(200,50,30,.22), transparent 70%), radial-gradient(45% 45% at 5% 95%, rgba(242,169,59,.12), transparent 70%), linear-gradient(180deg, #1C0D0A, #170A08)",
+      }}
+    >
+      <style>{`
+        @keyframes sfShine { from { transform: translateX(-150%) skewX(-20deg); } to { transform: translateX(450%) skewX(-20deg); } }
+        .sf-btn:hover .sf-shine { animation: sfShine .9s ease; }
+        @media (prefers-reduced-motion: reduce) { .sf-btn:hover .sf-shine { animation: none !important; } }
+      `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 space-y-16">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-brand-gold/15 pb-8">
-          <div className="space-y-3 max-w-xl">
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-gold/10 border border-brand-gold/25 text-brand-gold text-xs uppercase tracking-[0.25em] font-semibold"> */}
+      {/* Subtle dot pattern, same as the other sections */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20px 20px, #F2A93B 1.5px, transparent 2px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
 
-            <span className="text-xs uppercase tracking-[0.3em] text-brand-gold font-sans font-semibold mb-8">
-              {lang === "fi"
-                ? "Kokonaisvaltainen Palvelu"
-                : "Signature Offerings"}
-            </span>
-
-            {/* </div> */}
-            <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-brand-cream">
-              {lang === "fi"
-                ? "Ravintolamme Erikoisuudet"
-                : "Experience Tandoori Koti"}
-            </h2>
-          </div>
-          <p className="text-xs sm:text-sm text-brand-muted font-sans max-w-sm leading-relaxed">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          {...fadeUp}
+          className="mb-12 flex flex-col justify-between gap-6 md:mb-16 md:flex-row md:items-end"
+        >
+          <h2 className="max-w-xl font-serif text-4xl font-bold leading-[1.1] tracking-tight text-brand-cream sm:text-5xl lg:text-6xl">
             {lang === "fi"
-              ? "Arkipäivän lounaasta aina ylellisiin perhejuhliin ja kotiinkuljetukseen. Valitse elämys alta."
-              : "From rapid midday lunch feasts to candlelit dinners and tailored event catering in Tampere."}
+              ? "Ravintolamme erikoisuudet"
+              : "Everything Tandoori Koti offers"}
+          </h2>
+          <p className="max-w-sm font-sans text-lg leading-relaxed text-[#D9C6A8]">
+            {lang === "fi"
+              ? "Arkipäivän lounaasta juhlaillallisiin ja kotiinkuljetukseen. Valitse sinulle sopiva."
+              : "From a quick weekday lunch to candlelit dinners, takeaway and event catering in Kajaani."}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Master Showcase Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
-          {/* Left: Interactive Menu Navigation (Span 5) */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-3">
-            {features.map((item, idx) => {
-              const isSelected = activeIndex === idx;
+        <motion.div
+          {...fadeUp}
+          className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-10"
+        >
+          {/* Selector: horizontal scroll on mobile, vertical list on desktop */}
+          <div
+            role="tablist"
+            aria-label={lang === "fi" ? "Palvelut" : "Services"}
+            className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:col-span-5 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {FEATURES.map((item, idx) => {
+              const selected = activeIndex === idx;
+              const Icon = item.icon;
               return (
                 <button
                   key={item.id}
+                  type="button"
+                  role="tab"
+                  id={`feature-tab-${item.id}`}
+                  aria-selected={selected}
+                  aria-controls="feature-panel"
                   onClick={() => setActiveIndex(idx)}
-                  onMouseEnter={() => setActiveIndex(idx)}
-                  className={`w-full text-left p-5 rounded-2xl transition-all duration-300 relative border flex items-center justify-between group ${
-                    isSelected
-                      ? "bg-brand-card/90 border-brand-gold/50 shadow-lg shadow-brand-gold/5 translate-x-2"
-                      : "bg-brand-card/20 border-brand-gold/10 hover:border-brand-gold/25 hover:bg-brand-card/40"
+                  className={`group relative flex shrink-0 snap-start items-center gap-4 rounded-2xl border px-4 py-3.5 text-left transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2A93B] lg:w-full lg:flex-1 lg:px-5 ${
+                    selected
+                      ? "border-transparent"
+                      : "border-[#F2A93B]/15 bg-[#1C0D0A]/40 hover:border-[#F2A93B]/40 hover:bg-[#3B1511]/30"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <span
-                      className={`font-serif text-sm tracking-widest transition-colors ${
-                        isSelected
-                          ? "text-brand-gold font-bold"
-                          : "text-brand-muted group-hover:text-brand-cream"
-                      }`}
-                    >
-                      {item.index}
-                    </span>
-                    <div>
-                      <h3
-                        className={`font-serif text-lg font-bold transition-colors ${
-                          isSelected
-                            ? "text-brand-gold"
-                            : "text-brand-cream group-hover:text-brand-goldLight"
-                        }`}
-                      >
-                        {item.title[lang] || item.title.en}
-                      </h3>
-                      <p className="text-[11px] text-brand-muted font-sans tracking-wide">
-                        {item.subtitle[lang] || item.subtitle.en}
-                      </p>
-                    </div>
-                  </div>
+                  {selected && (
+                    <motion.span
+                      layoutId="feature-active"
+                      aria-hidden="true"
+                      className="absolute inset-0 rounded-2xl border border-[#F2A93B]/60 bg-[#3B1511]/80 shadow-lg shadow-black/40"
+                      transition={
+                        reduce
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 380, damping: 34 }
+                      }
+                    />
+                  )}
 
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      isSelected
-                        ? "bg-brand-gold text-brand-darker rotate-45"
-                        : "bg-brand-gold/10 text-brand-gold group-hover:bg-brand-gold/20"
+                  <span
+                    className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-full transition-colors duration-300 ${
+                      selected
+                        ? "bg-[#F2A93B] text-[#2A1206]"
+                        : "bg-[#F2A93B]/12 text-[#F2A93B] group-hover:bg-[#F2A93B]/22"
                     }`}
                   >
-                    <ArrowUpRight className="w-4 h-4 transition-transform" />
-                  </div>
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+
+                  <span className="relative min-w-0 flex-1">
+                    <span
+                      className={`block whitespace-nowrap font-serif text-lg font-bold transition-colors duration-300 lg:whitespace-normal ${
+                        selected ? "text-[#F2A93B]" : "text-brand-cream"
+                      }`}
+                    >
+                      {pick(item.title)}
+                    </span>
+                    <span className="hidden font-sans text-sm text-[#D9C6A8] lg:block">
+                      {pick(item.subtitle)}
+                    </span>
+                  </span>
+
+                  <span
+                    aria-hidden="true"
+                    className={`relative hidden h-9 w-9 shrink-0 place-items-center rounded-full transition duration-300 lg:grid ${
+                      selected
+                        ? "rotate-45 bg-[#F2A93B] text-[#2A1206]"
+                        : "bg-[#F2A93B]/10 text-[#F2A93B] group-hover:bg-[#F2A93B]/20"
+                    }`}
+                  >
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Right: Dynamic Visual Showcase Stage (Span 7) */}
-          <div className="lg:col-span-7">
-            <div className="relative h-full min-h-[460px] md:min-h-[540px] rounded-3xl overflow-hidden border border-brand-gold/25 bg-brand-card/60 flex flex-col justify-end p-8 md:p-12 shadow-2xl">
-              {/* Background Image with Cross-fade Animation */}
+          {/* Stage */}
+          <div className="relative lg:col-span-7">
+            {/* Dashed outline, echoing the hero plate ring */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-2 hidden rounded-[2rem] border-2 border-dashed border-[#F2A93B]/30 md:block"
+            />
+
+            <div
+              role="tabpanel"
+              id="feature-panel"
+              aria-labelledby={`feature-tab-${current.id}`}
+              className="relative flex h-full min-h-[520px] flex-col justify-end overflow-hidden rounded-3xl border-[5px] border-white/25 bg-[#3B1511] p-6 shadow-2xl shadow-black/60 md:min-h-[600px] md:p-10"
+            >
+              {/* Image crossfade */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={current.id}
-                  initial={{ opacity: 0, scale: 1.08 }}
+                  initial={{
+                    opacity: reduce ? 1 : 0,
+                    scale: reduce ? 1 : 1.08,
+                  }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.02 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  exit={{ opacity: reduce ? 1 : 0, scale: reduce ? 1 : 1.02 }}
+                  transition={{ duration: reduce ? 0 : 0.6, ease: "easeInOut" }}
                   className="absolute inset-0 z-0"
                 >
                   <Image
                     src={current.image}
-                    alt={current.title[lang] || current.title.en}
+                    alt=""
                     fill
                     unoptimized
-                    priority
-                    className="object-cover object-center brightness-[0.38]"
+                    sizes="(min-width: 1024px) 700px, 100vw"
+                    className="object-cover object-center brightness-[0.7]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080d0f] via-[#080d0f]/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1C0D0A] via-[#1C0D0A]/75 to-[#1C0D0A]/5" />
                 </motion.div>
               </AnimatePresence>
 
-              {/* Dynamic Content Overlay */}
-              <div className="relative z-10 space-y-6">
-                {/* Badge & Number */}
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/20 backdrop-blur-md border border-brand-gold/40 text-[11px] font-sans uppercase font-bold tracking-widest text-brand-gold">
-                    {current.badge[lang] || current.badge.en}
-                  </span>
-                  <span className="font-serif text-3xl font-light text-brand-gold/40 tracking-wider">
-                    {current.index} / 05
-                  </span>
-                </div>
+              {/* Content */}
+              <motion.div
+                key={current.id}
+                variants={stage}
+                initial="hidden"
+                animate="visible"
+                className="relative z-10 space-y-5"
+              >
+                <motion.span
+                  variants={stageItem}
+                  className="inline-flex rounded-full border border-[#F2A93B]/50 bg-[#1C0D0A]/70 px-4 py-1.5 font-sans text-sm font-semibold text-[#F2A93B] backdrop-blur-md"
+                >
+                  {pick(current.badge)}
+                </motion.span>
 
-                {/* Title & Description */}
-                <div className="space-y-3">
-                  <h3 className="font-serif text-3xl sm:text-4xl font-bold text-brand-cream">
-                    {current.title[lang] || current.title.en}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-brand-cream/80 font-sans leading-relaxed max-w-xl">
-                    {current.description[lang] || current.description.en}
-                  </p>
-                </div>
+                <motion.h3
+                  variants={stageItem}
+                  className="font-serif text-3xl font-bold leading-tight text-brand-cream sm:text-4xl lg:text-5xl"
+                >
+                  {pick(current.title)}
+                </motion.h3>
 
-                {/* Key Highlights */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  {(current.highlights[lang] || current.highlights.en).map(
-                    (point, pIdx) => (
-                      <div
-                        key={pIdx}
-                        className="flex items-center gap-2 p-2.5 rounded-xl bg-black/40 border border-brand-gold/15 backdrop-blur-sm"
+                <motion.p
+                  variants={stageItem}
+                  className="max-w-xl font-sans text-base leading-relaxed text-[#EADFCB] sm:text-lg"
+                >
+                  {pick(current.description)}
+                </motion.p>
+
+                <motion.ul
+                  variants={stageItem}
+                  className="flex flex-wrap gap-2.5"
+                >
+                  {(current.highlights[lang] || current.highlights.fi).map(
+                    (point) => (
+                      <li
+                        key={point}
+                        className="flex items-center gap-2 rounded-full border border-[#F2A93B]/30 bg-[#1C0D0A]/70 px-3.5 py-2 font-sans text-sm text-brand-cream backdrop-blur-sm"
                       >
-                        <div className="w-4 h-4 rounded-full bg-brand-gold/20 flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 text-brand-gold" />
-                        </div>
-                        <span className="text-[11px] font-sans text-brand-cream/90 font-medium">
-                          {point}
-                        </span>
-                      </div>
+                        <Check
+                          className="h-4 w-4 shrink-0 text-[#F2A93B]"
+                          aria-hidden="true"
+                        />
+                        {point}
+                      </li>
                     ),
                   )}
-                </div>
+                </motion.ul>
 
-                {/* Action Link */}
-                <div className="pt-4">
+                <motion.div variants={stageItem} className="pt-2">
                   <Link
                     href={current.cta.href}
-                    className="inline-flex items-center gap-3 px-7 py-3.5 rounded-none bg-brand-gold text-brand-darker hover:bg-brand-goldLight text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 shadow-xl shadow-brand-gold/10 group"
+                    className="sf-btn relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#F2A93B] px-7 py-3.5 font-sans text-base font-semibold text-[#2A1206] transition duration-300 hover:-translate-y-0.5 hover:bg-[#FFBD57] hover:shadow-lg hover:shadow-[#F2A93B]/30 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F2A93B]"
                   >
-                    <span>{current.cta[lang] || current.cta.en}</span>
-                    <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <span
+                      aria-hidden="true"
+                      className="sf-shine pointer-events-none absolute inset-y-0 left-0 w-1/4 -translate-x-[150%] bg-white/40"
+                    />
+                    <span className="relative">{pick(current.cta)}</span>
+                    <ArrowUpRight
+                      className="relative h-4 w-4"
+                      aria-hidden="true"
+                    />
                   </Link>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

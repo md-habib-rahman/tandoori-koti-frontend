@@ -3,178 +3,223 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLanguage } from "@/context/LanguageContext";
+import useChefPicks from "@/hooks/useChefPicks";
+import ServingBadge from "@/components/common/ServingBadge";
 
-const CHEF_PICKS = [
-  {
-    id: "butter-chicken",
-    nameEn: "Murg Makhani (Butter Chicken)",
-    nameFi: "Murg Makhani (Voikana)",
-    descEn:
-      "Char-grilled tandoori chicken simmered in a silky tomato, cashew cream, and churned butter sauce.",
-    descFi:
-      "Tandoorigrillattua kanaa haudutettuna pehmeässä tomaatti-, cashewkerma- ja voikastikkeessa.",
-    price: "17.50",
-    tagEn: "House Signature",
-    tagFi: "Talon Suosikki",
-    image:
-      "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80",
-    thumb:
-      "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=200&q=80",
-  },
-  {
-    id: "sizzler",
-    nameEn: "Tandoori Mix Tikka Sizzler",
-    nameFi: "Tandoori Mix Tikka Sizzler",
-    descEn:
-      "Marinated chicken tikka, lamb tikka, and cottage cheese roasted over live coals, served on a sizzling hot plate.",
-    descFi:
-      "Marinoitua kanaa, lammasta ja tuorejuustoa grillattuna tandoorissa, tarjoiltuna tirisevällä valurautapannulla.",
-    price: "20.50",
-    tagEn: "Sizzling Special",
-    tagFi: "Tirisevä Erikoisuus",
-    image:
-      "https://media-cdn.tripadvisor.com/media/photo-s/1f/16/81/37/chicken-tikka-sizzler.jpg",
-    thumb:
-      "https://media-cdn.tripadvisor.com/media/photo-s/1f/16/81/37/chicken-tikka-sizzler.jpg",
-  },
-  {
-    id: "palak-paneer",
-    nameEn: "Palak Paneer",
-    nameFi: "Palak Paneer",
-    descEn:
-      "Fresh house-made cottage cheese cubes steeped in a rich, slow-simmered garlic spinach gravy.",
-    descFi:
-      "Talon tuorejuustokuutioita haudutettuna miedosti maustetussa, täyteläisessä valkosipulipinaatissa.",
-    price: "15.50",
-    tagEn: "Vegetarian Delicacy",
-    tagFi: "Kasvisherkku",
-    image:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80",
-    thumb:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80",
-  },
-  {
-    id: "lamb-rogan",
-    nameEn: "Mutton Rogan Josh",
-    nameFi: "Mutton Rogan Josh",
-    descEn:
-      "Tender lamb chunks braised with Kashmiri red chilies, roasted cloves, green cardamom, and rich onion gravy.",
-    descFi:
-      "Mureaa lammasta haudutettuna kashmirilaisessa chili-, kardemumma- ja aromaattisessa yrttikastikkeessa.",
-    price: "18.90",
-    tagEn: "Kashmiri Classic",
-    tagFi: "Kashmiri-Klassikko",
-    image:
-      "https://images.unsplash.com/photo-1545247181-516773cae754?auto=format&fit=crop&w=800&q=80",
-    thumb:
-      "https://images.unsplash.com/photo-1545247181-516773cae754?auto=format&fit=crop&w=200&q=80",
-  },
-];
+// Loading placeholder with the same layout, so the page does not jump when the dishes arrive
+function Skeleton() {
+  return (
+    <section
+      aria-hidden="true"
+      className="relative w-full overflow-hidden border-t border-[#F2A93B]/15 py-24 md:py-32"
+      style={{
+        backgroundImage:
+          "radial-gradient(55% 55% at 25% 55%, rgba(200,50,30,.3), transparent 70%), linear-gradient(170deg, #2A100D, #1C0D0A 70%)",
+      }}
+    >
+      <div className="relative z-10 mx-auto max-w-7xl space-y-16 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl space-y-4">
+          <div className="mx-auto h-12 w-3/4 animate-pulse rounded-full bg-[#F2A93B]/10" />
+          <div className="mx-auto h-5 w-full animate-pulse rounded-full bg-[#F2A93B]/10" />
+        </div>
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+          <div className="flex justify-center lg:col-span-7">
+            <div className="h-72 w-72 animate-pulse rounded-full bg-[#F2A93B]/10 sm:h-80 sm:w-80 md:h-96 md:w-96" />
+          </div>
+          <div className="space-y-4 lg:col-span-5">
+            <div className="h-8 w-40 animate-pulse rounded-full bg-[#F2A93B]/10" />
+            <div className="h-10 w-3/4 animate-pulse rounded-full bg-[#F2A93B]/10" />
+            <div className="h-5 w-full animate-pulse rounded-full bg-[#F2A93B]/10" />
+            <div className="h-5 w-2/3 animate-pulse rounded-full bg-[#F2A93B]/10" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function ChefRecommend() {
   const { lang } = useLanguage();
+  const reduce = useReducedMotion();
+  const { picks, loading, error } = useChefPicks();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const activeDish = CHEF_PICKS[selectedIndex];
+
+  const fi = lang === "fi";
+
+  if (loading) return <Skeleton />;
+
+  // No recommendations (or the API is down): leave the section out instead of showing an empty block
+  if (error || picks.length === 0) return null;
+
+  const activeDish = picks[Math.min(selectedIndex, picks.length - 1)];
+
+  const name = (d) => (fi ? d.nameFi || d.nameEn : d.nameEn || d.nameFi);
+  const description = (d) =>
+    fi
+      ? d.preparationFi || d.preparationEn
+      : d.preparationEn || d.preparationFi;
+  // Badge text chosen by the staff, or the dish's category when none was entered
+  const tag = (d) =>
+    fi
+      ? d.chefTagFi || d.categoryFi || d.categoryEn
+      : d.chefTagEn || d.categoryEn || d.categoryFi;
+  const money = (p) => {
+    const s = Number(p).toFixed(2);
+    return fi ? `${s.replace(".", ",")} €` : `€${s}`;
+  };
+
+  const info = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: reduce ? 0 : 0.09,
+        delayChildren: reduce ? 0 : 0.1,
+      },
+    },
+  };
+  const infoItem = {
+    hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 18 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
 
   return (
-    <section className="relative w-full py-24 md:py-32 bg-brand-darker border-t border-brand-gold/15 overflow-hidden">
-      {/* Background Image Layer */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+    <section
+      className="relative w-full overflow-hidden border-t border-[#F2A93B]/15 py-24 md:py-32"
+      style={{
+        backgroundImage:
+          "radial-gradient(55% 55% at 25% 55%, rgba(200,50,30,.3), transparent 70%), radial-gradient(40% 40% at 95% 90%, rgba(242,169,59,.14), transparent 70%), linear-gradient(170deg, #2A100D, #1C0D0A 70%)",
+      }}
+    >
+      <style>{`
+        @keyframes chShine { from { transform: translateX(-150%) skewX(-20deg); } to { transform: translateX(450%) skewX(-20deg); } }
+        .ch-btn:hover .ch-shine { animation: chShine .9s ease; }
+        @media (prefers-reduced-motion: reduce) { .ch-btn:hover .ch-shine { animation: none !important; } }
+      `}</style>
+
+      {/* Chef background photo, warmed and darkened so text stays readable */}
+      <div className="pointer-events-none absolute inset-0 z-0">
         <Image
           src="https://res.cloudinary.com/vbi0knds/image/upload/v1788718601/DSC09469.jpg"
-          alt="Culinary background"
+          alt=""
           fill
-          priority
           unoptimized
-          className="object-cover object-right opacity-50"
+          sizes="100vw"
+          className="object-cover object-right opacity-35"
         />
-        {/* Dark Gradient Overlay to keep text legible */}
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-darker via-brand-darker/10 to-brand-darker" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C0D0A] via-[#1C0D0A]/40 to-[#1C0D0A]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#3B1511]/60 via-transparent to-transparent" />
       </div>
 
-      {/* Ambient Radial Glow */}
-      <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-gold/10 rounded-full blur-[150px] pointer-events-none" />
-      {/* Ambient Backdrop Glows */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.15, 0.25, 0.15],
+      {/* Dot pattern, same as the other sections */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20px 20px, #F2A93B 1.5px, transparent 2px)",
+          backgroundSize: "40px 40px",
         }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-gold/15 rounded-full blur-[140px] pointer-events-none"
       />
 
-      <div className="max-w-6xl mx-auto px-6 relative z-10 space-y-16">
-        {/* Section Header with Staggered Scroll Reveal */}
+      <div className="relative z-10 mx-auto max-w-7xl space-y-16 px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center space-y-4 max-w-2xl mx-auto"
+          transition={{ duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto max-w-2xl space-y-4 text-center"
         >
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-gold font-sans font-semibold">
-            {lang === "fi"
-              ? "KOKIN ERIKOISUUDET"
-              : "CHEF'S SIGNATURE SELECTION"}
-          </span>
-
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-brand-cream font-bold tracking-tight">
-            {lang === "fi" ? "Keittiömestarin Suositus" : "Our Chef Recommend"}
+          <h2 className="font-serif text-4xl font-bold leading-[1.1] tracking-tight text-brand-cream md:text-5xl lg:text-6xl">
+            {fi ? "Keittiömestarin suositus" : "The chef’s recommendations"}
           </h2>
-
-          <p className="text-sm md:text-base text-brand-muted font-sans leading-relaxed">
-            {lang === "fi"
+          <p className="font-sans text-lg leading-relaxed text-[#D9C6A8]">
+            {fi
               ? "Tarkoin valitut nimikkoannoksemme heijastavat intialaisen keittiön aidoimpia vivahteita ja tandooriuunimme parasta antia."
-              : "Carefully selected signature recipes capturing the depth, aroma, and fiery perfection of traditional Indian tandoor cooking."}
+              : "Signature dishes chosen for the depth, aroma and fire of traditional Indian tandoor cooking."}
           </p>
         </motion.div>
 
-        {/* Interactive Showcase: Featured Plate & Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left / Center: Animated Circular Hero Plate */}
+        {/* Showcase */}
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* Plate */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: reduce ? 1 : 0, scale: reduce ? 1 : 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.9, type: "spring", stiffness: 100 }}
-            className="lg:col-span-7 flex justify-center"
+            transition={{
+              duration: reduce ? 0 : 0.9,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="flex justify-center lg:col-span-7"
           >
             <div className="relative">
-              {/* Outer Golden Halo Ring */}
+              {/* Warm glow */}
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-4 sm:-inset-6 rounded-full border border-dashed border-brand-gold/30 pointer-events-none"
-              />
-
-              {/* Main Showcase Plate with Gentle Levitation */}
-              <motion.div
-                animate={{ y: [-6, 6, -6] }}
+                aria-hidden="true"
+                animate={
+                  reduce
+                    ? undefined
+                    : { scale: [1, 1.08, 1], opacity: [0.6, 0.95, 0.6] }
+                }
                 transition={{
-                  duration: 5,
+                  duration: 6,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="relative w-72 h-72 sm:w-88 sm:h-88 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-brand-gold/40 shadow-2xl shadow-black"
+                className="absolute -inset-16 rounded-full blur-2xl"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(242,169,59,.45), rgba(200,50,30,.22) 42%, transparent 68%)",
+                }}
+              />
+
+              {/* Rotating dashed ring */}
+              <motion.div
+                aria-hidden="true"
+                animate={reduce ? undefined : { rotate: 360 }}
+                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                className="pointer-events-none absolute -inset-4 rounded-full border-2 border-dashed border-[#F2A93B]/35 sm:-inset-6"
+              />
+
+              {/* Plate with gentle float */}
+              <motion.div
+                animate={reduce ? undefined : { y: [-6, 6, -6] }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="relative h-72 w-72 overflow-hidden rounded-full border-[6px] border-white/30 shadow-2xl shadow-black/60 sm:h-80 sm:w-80 md:h-96 md:w-96"
               >
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeDish.id}
-                    initial={{ opacity: 0, scale: 1.1, rotate: -8 }}
+                    initial={{
+                      opacity: reduce ? 1 : 0,
+                      scale: reduce ? 1 : 1.1,
+                      rotate: reduce ? 0 : -8,
+                    }}
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, rotate: 8 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="relative w-full h-full"
+                    exit={{
+                      opacity: reduce ? 1 : 0,
+                      scale: reduce ? 1 : 0.95,
+                      rotate: reduce ? 0 : 8,
+                    }}
+                    transition={{ duration: reduce ? 0 : 0.5, ease: "easeOut" }}
+                    className="relative h-full w-full"
                   >
                     <Image
-                      src={activeDish.image}
-                      alt={activeDish.nameEn}
+                      src={activeDish.imageUrl}
+                      alt={name(activeDish)}
                       fill
                       unoptimized
-                      priority
+                      sizes="(min-width: 768px) 384px, 288px"
                       className="object-cover"
                     />
                   </motion.div>
@@ -183,100 +228,150 @@ export default function ChefRecommend() {
             </div>
           </motion.div>
 
-          {/* Right: Active Dish Information & Order CTA */}
-          <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
+          {/* Dish details */}
+          <div
+            className="text-center lg:col-span-5 lg:text-left"
+            aria-live="polite"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeDish.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-                className="space-y-4"
+                variants={info}
+                initial="hidden"
+                animate="visible"
+                exit={{
+                  opacity: reduce ? 1 : 0,
+                  x: reduce ? 0 : -20,
+                  transition: { duration: reduce ? 0 : 0.25 },
+                }}
+                className="space-y-5"
               >
-                <span className="inline-block text-[11px] uppercase tracking-[0.25em] text-brand-gold bg-brand-gold/10 border border-brand-gold/30 px-3 py-1 rounded-full font-semibold">
-                  {lang === "fi" ? activeDish.tagFi : activeDish.tagEn}
-                </span>
+                {tag(activeDish) && (
+                  <motion.span
+                    variants={infoItem}
+                    className="inline-flex rounded-full border border-[#F2A93B]/50 bg-[#1C0D0A]/70 px-4 py-1.5 font-sans text-sm font-semibold text-[#F2A93B] backdrop-blur-md"
+                  >
+                    {tag(activeDish)}
+                  </motion.span>
+                )}
 
-                <h3 className="text-2xl sm:text-3xl font-serif text-brand-cream font-bold">
-                  {lang === "fi" ? activeDish.nameFi : activeDish.nameEn}
-                </h3>
+                <motion.h3
+                  variants={infoItem}
+                  className="font-serif text-3xl font-bold leading-tight text-brand-cream sm:text-4xl"
+                >
+                  {name(activeDish)}
+                </motion.h3>
 
-                <p className="text-sm sm:text-base text-brand-muted font-sans leading-relaxed">
-                  {lang === "fi" ? activeDish.descFi : activeDish.descEn}
-                </p>
+                {description(activeDish) && (
+                  <motion.p
+                    variants={infoItem}
+                    className="mx-auto max-w-md font-sans text-lg leading-relaxed text-[#D9C6A8] lg:mx-0"
+                  >
+                    {description(activeDish)}
+                  </motion.p>
+                )}
 
-                <div className="pt-2 flex items-center justify-center lg:justify-start gap-4">
-                  <span className="text-2xl font-serif font-bold text-brand-gold">
-                    €{activeDish.price}
+                <motion.div
+                  variants={infoItem}
+                  className="flex flex-wrap items-center justify-center gap-4 pt-1 lg:justify-start"
+                >
+                  <span className="font-serif text-3xl font-bold text-[#F2A93B]">
+                    {money(activeDish.price)}
                   </span>
+                  <ServingBadge dish={activeDish} />
+                </motion.div>
+
+                <motion.div variants={infoItem} className="pt-1">
                   <Link
                     href="/menu"
-                    className="px-6 py-2.5 bg-brand-gold text-brand-darker hover:bg-brand-goldLight text-xs uppercase tracking-widest font-bold transition-all duration-300 shadow-md shadow-brand-gold/10"
+                    className="ch-btn relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[#F2A93B] px-7 py-3.5 font-sans text-base font-semibold text-[#2A1206] transition duration-300 hover:-translate-y-0.5 hover:bg-[#FFBD57] hover:shadow-lg hover:shadow-[#F2A93B]/30 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F2A93B]"
                   >
-                    {lang === "fi" ? "Koko Menu" : "View Full Menu"}
+                    <span
+                      aria-hidden="true"
+                      className="ch-shine pointer-events-none absolute inset-y-0 left-0 w-1/4 -translate-x-[150%] bg-white/40"
+                    />
+                    <span className="relative">
+                      {fi ? "Katso ruokalista" : "View full menu"}
+                    </span>
                   </Link>
-                </div>
+                </motion.div>
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
 
-        {/* Bottom Interactive Thumbnail Selector (Matching Reference Card Row) */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="border border-brand-gold/25 bg-brand-card/70 backdrop-blur-md rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto"
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {CHEF_PICKS.map((dish, idx) => {
-              const isSelected = idx === selectedIndex;
-              return (
-                <motion.button
-                  key={dish.id}
-                  onClick={() => setSelectedIndex(idx)}
-                  whileHover={{ scale: 1.04, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
-                  className={`relative p-3 rounded-xl flex flex-col items-center gap-3 transition-all duration-300 text-center ${
-                    isSelected
-                      ? "bg-brand-gold/15 border border-brand-gold shadow-lg shadow-brand-gold/10"
-                      : "border border-transparent hover:border-brand-gold/30 hover:bg-brand-darker/60"
-                  }`}
-                >
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-brand-gold/40 shadow-md">
-                    <Image
-                      src={dish.thumb}
-                      alt={dish.nameEn}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  </div>
+        {/* Dish selector (hidden when there is only one recommendation) */}
+        {picks.length > 1 && (
+          <motion.div
+            initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: reduce ? 0 : 0.7, delay: reduce ? 0 : 0.2 }}
+            className="mx-auto max-w-4xl rounded-3xl border border-[#F2A93B]/25 bg-[#1C0D0A]/70 p-3 backdrop-blur-md sm:p-4"
+          >
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+              {picks.map((dish, idx) => {
+                const selected = dish.id === activeDish.id;
+                return (
+                  <button
+                    key={dish.id}
+                    type="button"
+                    onClick={() => setSelectedIndex(idx)}
+                    aria-pressed={selected}
+                    className={`group relative flex flex-col items-center gap-3 rounded-2xl border p-3 text-center transition duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2A93B] ${
+                      selected
+                        ? "border-transparent"
+                        : "border-transparent hover:-translate-y-0.5 hover:border-[#F2A93B]/30 hover:bg-[#3B1511]/30"
+                    }`}
+                  >
+                    {selected && (
+                      <motion.span
+                        layoutId="chef-active"
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-2xl border border-[#F2A93B]/60 bg-[#3B1511]/80 shadow-lg shadow-black/40"
+                        transition={
+                          reduce
+                            ? { duration: 0 }
+                            : { type: "spring", stiffness: 380, damping: 34 }
+                        }
+                      />
+                    )}
 
-                  <div className="min-w-0">
-                    <p
-                      className={`text-xs font-serif font-bold truncate ${isSelected ? "text-brand-gold" : "text-brand-cream"}`}
+                    <span
+                      className={`relative h-16 w-16 overflow-hidden rounded-full border-2 shadow-md transition-colors duration-300 sm:h-20 sm:w-20 ${
+                        selected
+                          ? "border-[#F2A93B]"
+                          : "border-[#F2A93B]/30 group-hover:border-[#F2A93B]/60"
+                      }`}
                     >
-                      {lang === "fi" ? dish.nameFi : dish.nameEn}
-                    </p>
-                    <span className="text-[11px] text-brand-muted font-sans font-medium">
-                      €{dish.price}
+                      <Image
+                        src={dish.imageUrl}
+                        alt=""
+                        fill
+                        unoptimized
+                        sizes="80px"
+                        className="object-cover"
+                      />
                     </span>
-                  </div>
 
-                  {isSelected && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute -bottom-1 h-1 w-10 bg-brand-gold rounded-full"
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
+                    <span className="relative min-w-0">
+                      <span
+                        className={`block font-serif text-sm font-bold leading-snug transition-colors duration-300 ${
+                          selected ? "text-[#F2A93B]" : "text-brand-cream"
+                        }`}
+                      >
+                        {name(dish)}
+                      </span>
+                      <span className="font-sans text-sm text-[#D9C6A8]">
+                        {money(dish.price)}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
       </div>
     </section>
   );

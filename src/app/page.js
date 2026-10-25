@@ -1,10 +1,15 @@
 import InstagramGrid from "@/components/common/InstagramGrid";
 import ReservationCta from "@/components/common/ReservationCta";
-import ChefRecommend from "@/components/home/ChefRecommend";
+
 import FeaturedMenu from "@/components/home/FeaturedMenu";
-import Hero from "@/components/home/Hero";
+
+// import HeroNew from "@/components/home/HeroNew";
 import SpecialFeatures from "@/components/home/SpecialFeatures";
 import StorySnippet from "@/components/home/StorySnippet";
+
+import ReviewsSection from "@/components/home/ReviewsSection";
+import ChefRecommend from "@/components/home/ChefRecommend";
+import Hero from "@/components/home/Hero";
 
 export default function HomePage() {
   return (
@@ -16,6 +21,7 @@ export default function HomePage() {
       <FeaturedMenu />
       <ReservationCta />
       <InstagramGrid />
+      <ReviewsSection />
     </div>
   );
 }

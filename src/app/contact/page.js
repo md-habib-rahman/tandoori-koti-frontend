@@ -16,6 +16,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import InstagramGrid from "@/components/common/InstagramGrid";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import ReservationSection from "@/components/reservation/ReservationSection";
+import ContactHero from "@/components/contact/ContactHero";
+import ContactInfo from "@/components/contact/ContactInfo";
+import ContactForm from "@/components/contact/ContactForm";
+import ContactAboutBanner from "@/components/contact/ContactAboutBanner";
+import DeliverySection from "@/components/delivery/DeliverySection";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 24 },
@@ -168,7 +173,7 @@ export default function ContactPage() {
       {/* --------------------------------------------------------
           1. HERO HEADER WITH AMBIENT BANQUET PHOTO (Matching Contact.jpg)
       -------------------------------------------------------- */}
-      <section className="relative w-full h-100 md:h-125 flex items-center justify-center overflow-hidden">
+      {/* <section className="relative w-full h-100 md:h-125 flex items-center justify-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1800&q=80"
           alt="Outdoor dining table"
@@ -197,129 +202,14 @@ export default function ContactPage() {
             {t.title}
           </motion.h1>
         </div>
-      </section>
+      </section> */}
+
+      <ContactHero badge={t.badge} title={t.title} />
 
       {/* --------------------------------------------------------
           2. CONTACT DETAILS & OPENING HOURS (4-COLUMN MATRIX)
       -------------------------------------------------------- */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-16 md:py-24 border-b border-brand-gold/15">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12">
-          {/* Col 1: Address */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-3"
-          >
-            <h2 className="font-serif text-lg font-bold text-brand-gold tracking-wide">
-              {t.addressTitle}
-            </h2>
-            <p className="text-xs sm:text-sm text-brand-muted font-sans leading-relaxed whitespace-pre-line">
-              {t.address}
-            </p>
-          </motion.div>
-
-          {/* Col 2: Phone & Email */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-3"
-          >
-            <h2 className="font-serif text-lg font-bold text-brand-gold tracking-wide">
-              {lang === "fi" ? "Puhelin & Sähköposti" : "Direct Inquiries"}
-            </h2>
-            <div className="text-xs sm:text-sm text-brand-muted font-sans space-y-1.5">
-              <p className="flex items-center gap-1">
-                <Phone size={16} />{" "}
-                <a
-                  href={`tel:${t.phone.replace(/\s+/g, "")}`}
-                  className="hover:text-brand-gold transition-colors"
-                >
-                  {t.phone}
-                </a>
-              </p>
-              <p className="flex items-center gap-1">
-                <Mail size={16} />{" "}
-                <a
-                  href={`mailto:${t.email}`}
-                  className="hover:text-brand-gold transition-colors"
-                >
-                  {t.email}
-                </a>
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Col 3: Social Follow */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-3"
-          >
-            <h2 className="font-serif text-lg font-bold text-brand-gold tracking-wide">
-              {t.followTitle}
-            </h2>
-            <div className="flex flex-col text-xs sm:text-sm text-brand-muted font-sans space-y-1.5">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-brand-gold transition-colors"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.facebook.com/tandoorikoti"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-brand-gold transition-colors"
-              >
-                Facebook
-              </a>
-              {/* <a
-                href="https://tripadvisor.com"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-brand-gold transition-colors"
-              >
-                TripAdvisor
-              </a> */}
-            </div>
-          </motion.div>
-
-          {/* Col 4: Opening Hours */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-3"
-          >
-            <h2 className="font-serif text-lg font-bold text-brand-gold tracking-wide">
-              {t.hoursTitle}
-            </h2>
-            <div className="text-xs sm:text-sm text-brand-muted font-sans space-y-3">
-              <div>
-                <span className="text-brand-cream font-semibold block text-[11px] uppercase tracking-wider">
-                  {t.lunchTitle}
-                </span>
-                <p className="mt-0.5">{t.lunchHours}</p>
-              </div>
-              <div>
-                <span className="text-brand-cream font-semibold block text-[11px] uppercase tracking-wider">
-                  {t.dinnerTitle}
-                </span>
-                <p className="whitespace-pre-line mt-0.5">{t.dinnerHours}</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <ContactInfo t={t} />
 
       {/* --------------------------------------------------------
           3. FULL-WIDTH MONOCHROME DARK MAP (Matching Contact.jpg)
@@ -336,217 +226,27 @@ export default function ContactPage() {
         {/* <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-brand-dark to-transparent pointer-events-none" /> */}
       </section>
 
+      {/* Delivery */}
+
+      <DeliverySection />
+
       {/* --------------------------------------------------------
           4. GET IN TOUCH FORM SECTION (Matching Contact.jpg)
       -------------------------------------------------------- */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-8 py-24 md:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          {/* Left Column: Heading & Narrative */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="lg:col-span-5 space-y-5"
-          >
-            <span className="text-xs uppercase tracking-[0.25em] text-brand-gold font-sans font-semibold">
-              {t.formTag}
-            </span>
-
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-brand-cream tracking-tight">
-              {t.formHeading}
-            </h2>
-
-            <p className="text-xs sm:text-sm text-brand-muted font-sans leading-relaxed max-w-md">
-              {t.formDesc}
-            </p>
-          </motion.div>
-
-          {/* Right Column: Minimalist Underline Form */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="lg:col-span-7"
-          >
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Name + Email */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {/* Name */}
-                <div className="space-y-1">
-                  <label
-                    htmlFor="name"
-                    className="block text-xs uppercase tracking-wider text-brand-muted font-sans"
-                  >
-                    {t.nameLabel} *
-                  </label>
-
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border-b border-brand-gold/30 focus:border-brand-gold py-2.5 text-sm text-brand-cream focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="space-y-1">
-                  <label
-                    htmlFor="email"
-                    className="block text-xs uppercase tracking-wider text-brand-muted font-sans"
-                  >
-                    {t.emailLabel} *
-                  </label>
-
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border-b border-brand-gold/30 focus:border-brand-gold py-2.5 text-sm text-brand-cream focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Phone + Message */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {/* Phone */}
-                <div className="space-y-1">
-                  <label
-                    htmlFor="phone"
-                    className="block text-xs uppercase tracking-wider text-brand-muted font-sans"
-                  >
-                    {t.phoneLabel} *
-                  </label>
-
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border-b border-brand-gold/30 focus:border-brand-gold py-2.5 text-sm text-brand-cream focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Message */}
-                <div className="space-y-1">
-                  <label
-                    htmlFor="message"
-                    className="block text-xs uppercase tracking-wider text-brand-muted font-sans"
-                  >
-                    {t.messageLabel}
-                  </label>
-
-                  <input
-                    id="message"
-                    name="message"
-                    type="text"
-                    value={formData.message}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border-b border-brand-gold/30 focus:border-brand-gold py-2.5 text-sm text-brand-cream focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* reCAPTCHA v3
-            No visible widget is required.
-            The token is generated when the form is submitted.
-        */}
-
-              {/* Status Alert Banner */}
-              <AnimatePresence>
-                {status.state === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-sans"
-                  >
-                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-                    <span>{status.message}</span>
-                  </motion.div>
-                )}
-
-                {status.state === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-sans"
-                  >
-                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
-                    <span>{status.message}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Submit CTA */}
-              <div>
-                <motion.button
-                  type="submit"
-                  disabled={status.state === "loading"}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-10 py-3.5 bg-brand-gold text-brand-darker hover:bg-brand-goldLight text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 shadow-md shadow-brand-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {status.state === "loading" ? t.submitting : t.submitBtn}
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      </section>
+      <ContactForm
+        t={t}
+        formData={formData}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        status={status}
+      />
 
       <ReservationSection />
 
       {/* --------------------------------------------------------
           5. "DISCOVER ABOUT US" CALLOUT BANNER (Matching Contact.jpg)
       -------------------------------------------------------- */}
-      <section className="relative w-full py-20 bg-brand-darker border-y border-brand-gold/15 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-6 space-y-4">
-            <span className="text-xs uppercase tracking-[0.25em] text-brand-gold font-sans font-semibold">
-              {t.aboutBannerTag}
-            </span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-serif text-brand-cream font-bold leading-tight whitespace-pre-line">
-              {t.aboutBannerHeading}
-            </h3>
-            <p className="text-xs sm:text-sm text-brand-muted font-sans leading-relaxed max-w-md">
-              {t.aboutBannerDesc}
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-brand-gold hover:text-brand-goldLight font-bold transition-colors group"
-              >
-                {t.aboutBannerBtn}
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md h-64 sm:h-72 rounded-2xl overflow-hidden border border-brand-gold/25 shadow-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80"
-                alt="Culinary pot and dish"
-                fill
-                unoptimized
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-darker/60 to-transparent" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <ContactAboutBanner t={t} />
 
       {/* --------------------------------------------------------
           6. SHARED SOCIAL AMBIENCE GALLERY

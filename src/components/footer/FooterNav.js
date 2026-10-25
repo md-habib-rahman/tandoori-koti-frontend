@@ -1,44 +1,40 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function FooterNav() {
   const { lang } = useLanguage();
+  const fi = lang === "fi";
 
   const navLinks = [
-    {
-      label: lang === "fi" ? "Ruokalistat" : "Our Menus",
-      href: "/menu",
-    },
-    {
-      label: lang === "fi" ? "Lounasbuffet" : "Lunch Buffet",
-      href: "/buffet",
-    },
-    {
-      label: lang === "fi" ? "Pöytävaraus" : "Reservation",
-      href: "/contact#reserve",
-    },
-
-    {
-      label: lang === "fi" ? "Ota Yhteyttä" : "Contact Us",
-      href: "/contact",
-    },
+    { label: fi ? "Tarinamme" : "Our story", href: "/about" },
+    { label: fi ? "Ruokalistat" : "Our menu", href: "/menu" },
+    { label: fi ? "Lounasbuffet" : "Lunch buffet", href: "/buffet" },
+    { label: fi ? "Pöytävaraus" : "Reservation", href: "/contact#reserve" },
+    { label: fi ? "Ota yhteyttä" : "Contact us", href: "/contact" },
   ];
 
   return (
     <>
-      <h3 className="font-serif text-sm tracking-[0.2em] uppercase text-brand-gold font-semibold">
-        <span>{lang === "fi" ? "Navigointi" : "Navigation"}</span>
+      <h3 className="mb-5 font-serif text-xl font-bold text-[#F2A93B]">
+        {fi ? "Navigointi" : "Navigation"}
       </h3>
       <ul className="space-y-3">
-        {navLinks.map((item, index) => (
-          <li key={index}>
+        {navLinks.map((item) => (
+          <li key={item.href}>
             <Link
               href={item.href}
-              className="text-xs uppercase tracking-[0.18em] text-brand-muted hover:text-brand-gold transition-colors font-medium inline-block"
+              className="group inline-flex items-center gap-1.5 font-sans text-base text-brand-cream transition-colors duration-300 hover:text-[#F2A93B] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F2A93B]"
             >
-              {item.label}
+              <span className="relative after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-[#F2A93B] after:transition-transform after:duration-300 group-hover:after:scale-x-100">
+                {item.label}
+              </span>
+              <ArrowUpRight
+                className="h-4 w-4 -translate-x-1 translate-y-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
+                aria-hidden="true"
+              />
             </Link>
           </li>
         ))}
