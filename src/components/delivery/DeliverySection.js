@@ -40,7 +40,10 @@ export default function DeliverySection() {
   const [deliverySettings, setDeliverySettings] = useState({
     isDeliveryFee: false,
     deliveryFee: 0,
+    isEnableDelivery: false,
   });
+
+  const [settingsLoaded, setSettingsLoaded] = useState(false); // CHANGED
 
   //   useEffect(() => {
   //     if (empty === 0) setIsEmpty((prev) => !prev);
@@ -61,10 +64,15 @@ export default function DeliverySection() {
 
         setDeliverySettings({
           isDeliveryFee: Boolean(settings?.isDeliveryFee),
+          isEnableDelivery: Boolean(settings?.isEnableDelivery),
+
           deliveryFee: Number(settings?.deliveryFee) || 0,
         });
       } catch (err) {
         console.error("Failed to fetch delivery settings:", err);
+      } finally {
+        // CHANGED
+        if (!cancelled) setSettingsLoaded(true); // CHANGED
       }
     };
 
@@ -157,7 +165,7 @@ export default function DeliverySection() {
         items: lines.map(({ dish, qty }) => ({ id: dish.id, quantity: qty })),
         recaptchaToken,
       });
-	  console.log(res)
+      console.log(res);
 
       if (res.data?.success) {
         setOrder(res.data.data);
@@ -201,11 +209,15 @@ export default function DeliverySection() {
     },
   });
 
+  const isClosed = settingsLoaded && !deliverySettings.isEnableDelivery;
+
   return (
     <section
       id="delivery"
       ref={sectionRef}
-      className="relative w-full scroll-mt-16 overflow-hidden border-y border-[#F2A93B]/15 py-20 md:py-28"
+      className={`relative w-full scroll-mt-16 overflow-hidden border-y border-[#F2A93B]/15 ${
+        isClosed ? "py-10 md:py-14" : "py-20 md:py-28"
+      }`}
       style={{
         backgroundImage:
           "radial-gradient(55% 55% at 90% 10%, rgba(200,50,30,.26), transparent 70%), radial-gradient(45% 45% at 5% 95%, rgba(242,169,59,.12), transparent 70%), linear-gradient(180deg, #1C0D0A, #2A100D 50%, #170A08)",
@@ -227,8 +239,23 @@ export default function DeliverySection() {
           backgroundSize: "40px 40px",
         }}
       />
+      {isClosed && (
+        <div role="status" className="relative z-10 mx-auto max-w-xl px-6">
+          <div className="rounded-2xl border border-[#F2A93B]/35 bg-[#1C0D0A]/80 px-6 py-8 text-center backdrop-blur-sm sm:px-8">
+            <h3 className="font-serif text-xl font-bold text-brand-cream sm:text-3xl">
+              {fi
+                ? "Emme tällä hetkellä vastaanota kotiinkuljetustilauksia!"
+                : "Currently we are not receiving any delivery request!"}
+            </h3>
+          </div>
+        </div>
+      )}
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+      <div
+        className={`relative z-10 mx-auto max-w-7xl px-6 lg:px-8 ${
+          isClosed ? "hidden" : ""
+        }`}
+      >
         {/* Heading */}
         <motion.div
           {...fadeUp()}
