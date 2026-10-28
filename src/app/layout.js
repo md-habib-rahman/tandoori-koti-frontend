@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import Navbar from "@/components/layout/Navbar";
 import RecaptchaProvider from "@/components/providers/RecaptchaProvider";
 import Footer from "@/components/common/Footer";
+import { SettingsProvider } from "@/context/SettingsContext";
+
 
 const marcellus = Marcellus({
   weight: "400",
@@ -33,11 +35,13 @@ export default function RootLayout({ children }) {
     <html lang="fi" className={`${marcellus.variable} ${jakarta.variable}`}>
       <body className="bg-brand-dark text-brand-cream antialiased min-h-screen flex flex-col selection:bg-brand-gold/30 selection:text-brand-cream">
         <LanguageProvider>
-          <Navbar />
-          <RecaptchaProvider>
-            <main className="flex-1">{children}</main>
-          </RecaptchaProvider>
-          <Footer />
+          <SettingsProvider>
+            <Navbar />
+            <RecaptchaProvider>
+              <main className="flex-1">{children}</main>
+            </RecaptchaProvider>
+            <Footer />
+          </SettingsProvider>
         </LanguageProvider>
       </body>
     </html>

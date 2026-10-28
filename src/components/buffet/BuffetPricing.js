@@ -4,11 +4,31 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { BUFFET_INFO } from "./BuffetInfo";
 import { formatPrice } from "../../lib/formatPrice";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function BuffetPricing() {
   const { lang } = useLanguage();
   const reduce = useReducedMotion();
   const fi = lang === "fi";
+  const {
+    settings: { lunchBuffetPrice, lunchChildPrice, luchTakewayPrice },
+    loading,
+  } = useSettings();
+
+  //   console.log(lunchBuffetPrice, lunchChildPrice, luchTakewayPrice)
+
+  const priceById = {
+    buffet: lunchBuffetPrice,
+    children: lunchChildPrice,
+    takeaway: luchTakewayPrice,
+  };
+
+  const tiers = BUFFET_INFO.tiers.map((tier) => ({
+    ...tier,
+    price: formatPrice(priceById[tier.id]),
+  }));
+
+  console.log(tiers.map((tier) => tier.price));
 
   const list = {
     hidden: { opacity: reduce ? 1 : 0 },
@@ -45,7 +65,7 @@ export default function BuffetPricing() {
       </motion.h3>
 
       <ul className="space-y-4">
-        {BUFFET_INFO.tiers.map((tier) => (
+        {tiers.map((tier) => (
           <motion.li
             key={tier.id}
             variants={card}
@@ -65,7 +85,8 @@ export default function BuffetPricing() {
               </p>
             </div>
             <span className="shrink-0 font-serif text-3xl font-bold text-[#F2A93B] sm:text-4xl">
-              {formatPrice(tier.price, lang)}
+              {/* {formatPrice(tier.price, lang)} */}
+              {tier.price}
             </span>
           </motion.li>
         ))}
